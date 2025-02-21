@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:tugasku/screen/auth_login.dart';
+import 'package:tugasku/screen/onboarding.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -17,7 +17,7 @@ class _SplashState extends State<Splash> {
     Timer(
         Duration(seconds: 2),
         () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (BuildContext context) => AuthLogin())));
+            MaterialPageRoute(builder: (BuildContext context) => Onboarding())));
   }
 
   @override

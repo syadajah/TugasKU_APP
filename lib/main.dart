@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tugasku/screen/homepage.dart';
-import 'package:tugasku/screen/intro.dart';
 import 'package:tugasku/screen/splash.dart';
 
 void main() {

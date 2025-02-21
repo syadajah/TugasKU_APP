@@ -43,6 +43,7 @@ dependencies:
   introduction_screen: ^3.1.16
   get: ^4.7.1
   iconify_flutter_plus: ^1.0.4
+  smooth_page_indicator: ^1.2.0+3
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,7 @@ flutter:
   assets:
     - assets/icon/google.svg
     - assets/icon/history.svg
+    - assets/icon/logo.svg
 
   fonts:
     - family: Poppins

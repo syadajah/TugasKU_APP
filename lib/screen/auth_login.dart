@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/screen/auth_register.dart';
-import 'package:tugasku/screen/intro.dart';
+import 'package:tugasku/screen/onboarding.dart';
 
 class AuthLogin extends StatefulWidget {
   const AuthLogin({super.key});
@@ -28,7 +28,7 @@ class _AuthLoginState extends State<AuthLogin> {
                   GestureDetector(
                     onTap: () {
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Intro()));
+                          MaterialPageRoute(builder: (context) => Onboarding()));
                     },
                     child: HeroIcon(HeroIcons.arrowLeft,
                         size: 20,
@@ -39,7 +39,7 @@ class _AuthLoginState extends State<AuthLogin> {
                   GestureDetector(
                     onTap: () {
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Intro()));
+                          MaterialPageRoute(builder: (context) => Onboarding()));
                     },
                     child: Text(
                       "Kembali",
