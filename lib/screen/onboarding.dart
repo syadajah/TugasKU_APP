@@ -45,10 +45,27 @@ class _OnboardingState extends State<Onboarding> {
                     onTap: () {
                       _controller.jumpToPage(2);
                     },
-                    child: Text("Skip")),
+                    child: Text(
+                      "Skip",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: "Poppins",
+                        color: Color(0xff4d4d4d),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )),
 
                 //dot indicator
-                SmoothPageIndicator(controller: _controller, count: 3),
+                SmoothPageIndicator(
+                  controller: _controller,
+                  count: 3,
+                  effect: ExpandingDotsEffect(
+                    activeDotColor: Color(
+                      0xff052659,
+                    ),
+                    dotColor: Color(0xff4d4d4d),
+                  ),
+                ),
 
                 //Next or done
                 onLastPage
@@ -63,7 +80,15 @@ class _OnboardingState extends State<Onboarding> {
                             ),
                           );
                         },
-                        child: Text("Done"),
+                        child: Text(
+                          "Done",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: "Poppins",
+                            color: Color(0xff4d4d4d),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       )
                     : GestureDetector(
                         onTap: () {
@@ -71,7 +96,15 @@ class _OnboardingState extends State<Onboarding> {
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeIn);
                         },
-                        child: Text("Next"),
+                        child: Text(
+                          "Next",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: "Poppins",
+                            color: Color(0xff4d4d4d),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       )
               ],
             ))
