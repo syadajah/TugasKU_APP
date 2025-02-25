@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tugasku/screen/create_task.dart';
+import 'package:tugasku/screen/history.dart';
+import 'package:tugasku/screen/homepage.dart';
 import 'package:tugasku/screen/splash.dart';
 
 void main() {
@@ -19,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Splash(),
+      home: CreateTask(),
     );
   }
 }

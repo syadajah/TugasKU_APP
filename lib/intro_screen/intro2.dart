@@ -54,7 +54,7 @@ class Intro2 extends StatelessWidget {
           ),
           SizedBox(height: 20),
           Text(
-            "Catatan tugas mu kinI memiliki fitur pengingat",
+            "Catatan tugas mu kini memiliki fitur pengingat",
             style: TextStyle(
               fontSize: 12,
               fontFamily: "Poppins",

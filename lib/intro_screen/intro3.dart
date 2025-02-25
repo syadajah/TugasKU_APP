@@ -54,7 +54,7 @@ class Intro3 extends StatelessWidget {
           ),
           SizedBox(height: 20),
           Text(
-            "Catatan tugas mu kinI tidak harus ribet, dan bisa ",
+            "Catatan tugas mu kini tidak harus ribet, dan bisa ",
             style: TextStyle(
               fontSize: 12,
               fontFamily: "Poppins",

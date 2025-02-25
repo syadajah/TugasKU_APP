@@ -146,7 +146,7 @@ class _AuthLoginState extends State<AuthLogin> {
                                 backgroundColor: Color.fromARGB(225, 5, 38, 89),
                                 foregroundColor: Colors.white,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Masuk",
                                 style: TextStyle(
                                     fontFamily: "Poppins", fontSize: 12),

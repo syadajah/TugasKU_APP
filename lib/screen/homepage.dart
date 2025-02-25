@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:iconify_flutter_plus/iconify_flutter_plus.dart';
 import 'package:iconify_flutter_plus/icons/fa_solid.dart';
+import 'package:tugasku/screen/create_task.dart';
+import 'package:tugasku/screen/history.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});
@@ -56,7 +58,7 @@ class Homepage extends StatelessWidget {
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Padding(
-                padding: const EdgeInsets.only(top: 11, left: 23, right: 23),
+                padding: const EdgeInsets.only(top: 11, left: 15, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -92,14 +94,26 @@ class Homepage extends StatelessWidget {
                           spacing: -15,
                           children: [
                             IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => CreateTask()),
+                                      (route) => false);
+                                },
                                 icon: HeroIcon(
                                   HeroIcons.plus,
                                   size: 25,
                                   color: Color(0xff021024),
                                 )),
                             IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => History()),
+                                      (route) => false);
+                                },
                                 icon: Iconify(FaSolid.history,
                                     size: 20, color: Color(0xff021024))),
                           ],
