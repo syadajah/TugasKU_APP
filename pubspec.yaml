@@ -86,8 +86,11 @@ flutter:
 
   assets:
     - assets/icon/google.svg
-    - assets/icon/history.svg
     - assets/icon/logo.svg
+    - assets/icon/onboard1.svg
+    - assets/icon/onboard2.svg
+    - assets/icon/onboard3.svg
+    - assets/icon/history.svg
 
   fonts:
     - family: Poppins

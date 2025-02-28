@@ -38,9 +38,9 @@ class Intro3 extends StatelessWidget {
           ),
           SizedBox(height: 110),
           SvgPicture.asset(
-            "assets/icon/logo.svg",
-            width: 200,
-            height: 160,
+            "assets/icon/onboard3.svg",
+            width: 250,
+            height: 200,
           ),
           SizedBox(height: 70),
           Text(

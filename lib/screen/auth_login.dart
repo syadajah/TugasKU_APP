@@ -19,7 +19,7 @@ class _AuthLoginState extends State<AuthLogin> {
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          color: Color.fromARGB(255, 125, 160, 196),
+          color: Color(0xff052659),
           child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
             Padding(
               padding: EdgeInsets.only(top: 90, left: 23),
@@ -32,7 +32,7 @@ class _AuthLoginState extends State<AuthLogin> {
                     },
                     child: HeroIcon(HeroIcons.arrowLeft,
                         size: 20,
-                        color: Color.fromARGB(225, 77, 77, 100),
+                        color: Color(0xffffffff),
                         style: HeroIconStyle.solid),
                   ),
                   SizedBox(width: 8),
@@ -45,7 +45,7 @@ class _AuthLoginState extends State<AuthLogin> {
                       "Kembali",
                       style: TextStyle(
                         fontFamily: "Poppins",
-                        color: Color.fromARGB(225, 77, 77, 100),
+                        color: Color(0xffffffff),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

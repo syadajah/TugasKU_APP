@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/screen/onboarding.dart';
 
@@ -16,8 +17,8 @@ class _SplashState extends State<Splash> {
     super.initState();
     Timer(
         Duration(seconds: 2),
-        () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (BuildContext context) => Onboarding())));
+        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (BuildContext context) => Onboarding())));
   }
 
   @override
@@ -25,7 +26,7 @@ class _SplashState extends State<Splash> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: Color(0xff7DA0C4),
+          color: Color(0xffffffff),
           width: MediaQuery.of(context).size.width,
           child: Column(
             mainAxisSize: MainAxisSize.max,
@@ -38,11 +39,10 @@ class _SplashState extends State<Splash> {
                     children: [
                       Container(
                         padding: EdgeInsets.only(right: 5),
-                        child: HeroIcon(
-                          HeroIcons.bookOpen,
-                          style: HeroIconStyle.outline,
-                          color: Color(0xff021024),
-                          size: 30,
+                        child: SvgPicture.asset(
+                          "assets/icon/logo.svg",
+                          width: 20,
+                          height: 20,
                         ),
                       ),
                       Text(
