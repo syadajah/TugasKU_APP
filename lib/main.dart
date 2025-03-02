@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/create_task.dart';
 import 'package:tugasku/screen/history.dart';
 import 'package:tugasku/screen/homepage.dart';
-import 'package:tugasku/screen/onboarding.dart';
+import 'package:tugasku/screen/profile.dart';
 import 'package:tugasku/screen/splash.dart';
 
 void main() {
@@ -20,10 +21,10 @@ class MyApp extends StatelessWidget {
       title: 'TugasKU APP',
       theme: ThemeData(
 
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff7f7f7)),
         useMaterial3: true,
       ),
-      home: History(),
+      home: Homepage(),
     );
   }
 }

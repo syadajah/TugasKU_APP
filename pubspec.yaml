@@ -91,6 +91,11 @@ flutter:
     - assets/icon/onboard2.svg
     - assets/icon/onboard3.svg
     - assets/icon/history.svg
+    - assets/icon/arrow-back.svg
+    - assets/icon/collection.svg
+    - assets/icon/arrow-down.svg
+    - assets/icon/calendar.svg
+    - assets/icon/user-circle.svg
 
   fonts:
     - family: Poppins

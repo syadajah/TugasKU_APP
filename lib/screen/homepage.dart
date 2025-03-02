@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:tugasku/screen/create_task.dart';
+import 'package:tugasku/screen/history.dart';
+import 'package:tugasku/screen/profile.dart';
 
 class Homepage extends StatelessWidget {
   const Homepage({super.key});
@@ -21,7 +24,12 @@ class Homepage extends StatelessWidget {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Profile()));
+                          },
                           icon: const HeroIcon(
                             HeroIcons.userCircle,
                             size: 35,
@@ -57,7 +65,13 @@ class Homepage extends StatelessWidget {
                         SizedBox(
                           height: 38,
                           child: ElevatedButton.icon(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => History()),
+                              );
+                            },
                             label: const Text(
                               "Riwayat",
                               style: TextStyle(
@@ -138,24 +152,26 @@ class Homepage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateTask()),
+          );
+        },
         icon: const HeroIcon(
           HeroIcons.plus,
           size: 20,
           color: Color(0xffffffff),
           style: HeroIconStyle.solid,
-        ), 
+        ),
         label: const Text(
           "Tambah Tugas",
           style: TextStyle(
-              fontSize: 12,
-              color: Color(0xffffffff),
-              fontFamily: "Poppins"), 
+              fontSize: 12, color: Color(0xffffffff), fontFamily: "Poppins"),
         ),
         backgroundColor: Color(0xff052659), // Warna FAB
       ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

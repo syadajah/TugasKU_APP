@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:heroicons/heroicons.dart';
-import 'package:tugasku/screen/homepage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/route_manager.dart';
 
 class CreateTask extends StatelessWidget {
   const CreateTask({super.key});
@@ -10,77 +10,209 @@ class CreateTask extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => Homepage()),
-                      (route) => false);
-                },
-                icon: HeroIcon(HeroIcons.arrowLeft, style: HeroIconStyle.solid),
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 33,
+            ),
+            Text(
+              "Tambah Tugas",
+              style: TextStyle(
+                color: Color(0xff4D4D4D),
+                fontSize: 20,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.5,
               ),
-              SizedBox(width: 45),
-              HeroIcon(HeroIcons.bookOpen, size: 30, color: Color(0xff021024)),
-              SizedBox(width: 4),
-              Text(
-                "Tugas",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontFamily: "Poppins",
-                  color: Color(0xff021024),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "KU",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontFamily: "Poppins",
-                  color: Color(0xff4D4D4D),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      
+      ),
       body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(15),
-            child: Container(
-              color: Color(0xfff7f7f7),
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: 645,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child: TextField(
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
                       hintText: "Kategori",
-                      labelStyle: TextStyle(
+                      hintStyle: TextStyle(
                         fontFamily: "Poppins",
-                        fontSize: 10,
+                        fontSize: 12,
                         color: Color(0xff808080),
+                        fontWeight: FontWeight.w500,
                       ),
-                      prefixIcon: HeroIcon(HeroIcons.clipboardDocument,
-                          size: 20,
-                          color: Color.fromARGB(225, 128, 128, 128),
-                          style: HeroIconStyle.solid),
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(
+                            13.0), // Menghindari ikon terlalu besar
+                        child: SizedBox(
+                          width: 15,
+                          height: 15,
+                          child: SvgPicture.asset(
+                            "assets/icon/collection.svg",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                       border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(
+                          color: Color(0xff808080),
+                          width: 0.5,
+                        ),
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      suffixIcon: Padding(
+                        padding: EdgeInsets.all(
+                            10.0), // Menghindari ikon terlalu besar
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: SvgPicture.asset(
+                            "assets/icon/arrow-down.svg",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
                       contentPadding:
-                          EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                          EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                     ),
                   ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Color.fromARGB(225, 242, 242, 242),
+                      hintText: "Nama project",
+                      hintStyle: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 12,
+                        color: Color(0xff808080),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Color(0xff808080),
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Color(0xfff2f2f2),
+                    hintText: "Deskripsi",
+                    hintStyle: TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 12,
+                      color: Color(0xff808080),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Color(0xffB3B3B3), width: 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                  ),
+                  maxLines: 5,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Color.fromARGB(225, 242, 242, 242),
+                      hintText: "Deadline",
+                      hintStyle: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 12,
+                        color: Color(0xff808080),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(
+                            13.0), // Menghindari ikon terlalu besar
+                        child: SizedBox(
+                          width: 15,
+                          height: 15,
+                          child: SvgPicture.asset(
+                            "assets/icon/calendar.svg",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Color(0xff808080),
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      suffixIcon: Padding(
+                        padding: EdgeInsets.all(
+                            10.0), // Menghindari ikon terlalu besar
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: SvgPicture.asset(
+                            "assets/icon/arrow-down.svg",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 155,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(225, 5, 38, 89),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        "Tambah",
+                        style: TextStyle(fontFamily: "Poppins", fontSize: 12),
+                      )),
+                ),
+              ],
             ),
           ),
         ),
