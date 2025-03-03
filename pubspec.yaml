@@ -96,6 +96,8 @@ flutter:
     - assets/icon/arrow-down.svg
     - assets/icon/calendar.svg
     - assets/icon/user-circle.svg
+    - assets/icon/Profile_edit.svg
+    - assets/icon/clock.svg
 
   fonts:
     - family: Poppins

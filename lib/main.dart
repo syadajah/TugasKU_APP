@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/create_task.dart';
+import 'package:tugasku/screen/detail_tugas.dart';
+import 'package:tugasku/screen/edit_profile.dart';
 import 'package:tugasku/screen/history.dart';
 import 'package:tugasku/screen/homepage.dart';
 import 'package:tugasku/screen/profile.dart';

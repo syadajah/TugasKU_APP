@@ -115,7 +115,7 @@ class _AuthLoginState extends State<AuthLogin> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Color.fromARGB(225, 242, 242, 242),
-                            labelText: "Kata Sandi",
+                            labelText: "Password",
                             labelStyle: TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 12,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tugasku/screen/edit_profile.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -7,6 +8,22 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xffffffff),),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text("Detail",
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontFamily: "Poppins",
+                fontSize: 22,
+                color: Color(0xffffffff))),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Color(0xff052659),
+        foregroundColor: Colors.black,
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -16,15 +33,6 @@ class Profile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Profil",
-                style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0XFFFFFFFF)),
-              ),
-              SizedBox(height: 30),
               SvgPicture.asset(
                 "assets/icon/user-circle.svg",
                 width: 120,
@@ -74,7 +82,14 @@ class Profile extends StatelessWidget {
                               ),
                               SizedBox(height: 15),
                               ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditProfile(),
+                                    ),
+                                  );
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       Color.fromARGB(225, 5, 38, 89),
