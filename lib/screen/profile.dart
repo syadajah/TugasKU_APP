@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/edit_profile.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   const Profile({super.key});
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+
+  //get auth service 
+  final authService = AuthService();
+
+  // logout button function/pressed
+  void logout() async {
+    await authService.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +179,7 @@ class Profile extends StatelessWidget {
                             width: 300,
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: logout,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color(0xFFFFFFFF),
                                 foregroundColor: Color(0xff052659),

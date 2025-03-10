@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:tugasku/Auth/auth_gate.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/auth_register.dart';
 import 'package:tugasku/screen/onboarding.dart';
 
@@ -12,6 +15,35 @@ class AuthLogin extends StatefulWidget {
 }
 
 class _AuthLoginState extends State<AuthLogin> {
+  //get auth servce session
+  final authService = AuthService();
+
+  //textControllers
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  //Login button function/pressed
+  void login() async {
+    //prepare data
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    //attempt login..
+    try {
+      await authService.signInWithEmailPassword(email, password);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AuthGate()),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString()),
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,8 +59,10 @@ class _AuthLoginState extends State<AuthLogin> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Onboarding()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Onboarding()));
                     },
                     child: HeroIcon(HeroIcons.arrowLeft,
                         size: 20,
@@ -38,8 +72,10 @@ class _AuthLoginState extends State<AuthLogin> {
                   SizedBox(width: 8),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Onboarding()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Onboarding()));
                     },
                     child: Text(
                       "Kembali",
@@ -89,19 +125,22 @@ class _AuthLoginState extends State<AuthLogin> {
                         ),
                         SizedBox(height: 49),
                         TextField(
+                          controller: _emailController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Color.fromARGB(225, 242, 242, 242),
-                            labelText: "Username",
+                            labelText: "E-Mail",
                             labelStyle: TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 12,
                               color: Color.fromARGB(225, 128, 128, 128),
                             ),
-                            prefixIcon: HeroIcon(HeroIcons.user,
-                                size: 20,
-                                color: Color.fromARGB(225, 128, 128, 128),
-                                style: HeroIconStyle.solid),
+                            // prefixIcon: SvgPicture.asset("assets/icon/Mail.svg",
+                            //     width: 20,
+                            //     height: 20,
+                            //     colorFilter: ColorFilter.mode(
+                            //         Color.fromARGB(225, 128, 128, 128),
+                            //         BlendMode.srcIn)),
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10),
@@ -112,6 +151,7 @@ class _AuthLoginState extends State<AuthLogin> {
                         ),
                         SizedBox(height: 15),
                         TextField(
+                          controller: _passwordController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -141,12 +181,12 @@ class _AuthLoginState extends State<AuthLogin> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width,
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: login,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(225, 5, 38, 89),
                                 foregroundColor: Colors.white,
                               ),
-                              child: Text(
+                              child: const Text(
                                 "Masuk",
                                 style: TextStyle(
                                     fontFamily: "Poppins", fontSize: 12),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/screen/onboarding.dart';
 
 class Splash extends StatefulWidget {

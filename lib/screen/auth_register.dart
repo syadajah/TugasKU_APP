@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/auth_login.dart';
 
 class AuthRegister extends StatefulWidget {
@@ -10,6 +12,47 @@ class AuthRegister extends StatefulWidget {
 }
 
 class _AuthRegisterState extends State<AuthRegister> {
+  //get auth servce session
+  final authService = AuthService();
+
+  //textControllers
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  //Sign up button function/pressed
+  void signUp() async {
+    // prepare data
+    final email = _emailController.text;
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    //check if password and confirm password is the same
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password Doesn't Match!"),
+        ),
+      );
+      return;
+    }
+
+    // attempt to sign up..
+    try {
+      await authService.signUpWithEmailPassword(email, password);
+      //pop this register page
+      Navigator.pop(context);
+    }
+
+    //catch any error
+    catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,19 +136,23 @@ class _AuthRegisterState extends State<AuthRegister> {
                         ),
                         SizedBox(height: 49),
                         TextField(
+                          controller: _emailController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Color.fromARGB(225, 242, 242, 242),
-                            labelText: "Name",
+                            labelText: "E-Mail",
                             labelStyle: TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 12,
                               color: Color.fromARGB(225, 128, 128, 128),
                             ),
-                            prefixIcon: HeroIcon(HeroIcons.user,
-                                size: 20,
-                                color: Color.fromARGB(225, 128, 128, 128),
-                                style: HeroIconStyle.solid),
+                            prefixIcon: SvgPicture.asset(
+                                "assets/icon/Mail.svg",
+                                width: 5,
+                                height: 5,
+                                colorFilter: ColorFilter.mode(
+                                    Color.fromARGB(225, 128, 128, 128),
+                                    BlendMode.srcIn)),
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10),
@@ -116,29 +163,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                         ),
                         SizedBox(height: 15),
                         TextField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Color.fromARGB(225, 242, 242, 242),
-                            labelText: "Username",
-                            labelStyle: TextStyle(
-                              fontFamily: "Poppins",
-                              fontSize: 12,
-                              color: Color.fromARGB(225, 128, 128, 128),
-                            ),
-                            prefixIcon: HeroIcon(HeroIcons.user,
-                                size: 20,
-                                color: Color.fromARGB(225, 128, 128, 128),
-                                style: HeroIconStyle.solid),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 15),
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        TextField(
+                          obscureText: true,
+                          controller: _passwordController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -164,11 +190,40 @@ class _AuthRegisterState extends State<AuthRegister> {
                                 vertical: 5, horizontal: 15),
                           ),
                         ),
+                        SizedBox(height: 15),
+                        TextField(
+                          obscureText: true,
+                          controller: _confirmPasswordController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(225, 242, 242, 242),
+                            labelText: "Confirm Password",
+                            labelStyle: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 12,
+                              color: Color.fromARGB(225, 128, 128, 128),
+                            ),
+                            prefixIcon: HeroIcon(HeroIcons.lockClosed,
+                                size: 20,
+                                color: Color.fromARGB(225, 128, 128, 128),
+                                style: HeroIconStyle.solid),
+                            suffixIcon: HeroIcon(HeroIcons.eyeSlash,
+                                size: 20,
+                                color: Color.fromARGB(225, 128, 128, 128),
+                                style: HeroIconStyle.solid),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 15),
+                          ),
+                        ),
                         SizedBox(height: 50),
                         SizedBox(
                           width: MediaQuery.of(context).size.width,
                           child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: signUp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(225, 5, 38, 89),
                                 foregroundColor: Colors.white,

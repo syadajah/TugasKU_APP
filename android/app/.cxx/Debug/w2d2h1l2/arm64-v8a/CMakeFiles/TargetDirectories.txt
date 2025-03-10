@@ -1,0 +1,2 @@
+D:/tugasku/android/app/.cxx/Debug/w2d2h1l2/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/tugasku/android/app/.cxx/Debug/w2d2h1l2/arm64-v8a/CMakeFiles/rebuild_cache.dir

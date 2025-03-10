@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/create_task.dart';
 import 'package:tugasku/screen/history.dart';
 import 'package:tugasku/screen/profile.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
   @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
+
+  //get auth service
+  final authService = AuthService();
+
+  @override
   Widget build(BuildContext context) {
+
+    final currentEmail = authService.getUserCurrentEmail();
+
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,8 +54,8 @@ class Homepage extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
-                          children: const [
-                            Text(
+                          children: [
+                            const Text(
                               "Selamat datang!",
                               style: TextStyle(
                                 fontFamily: "Poppins",
@@ -51,8 +65,8 @@ class Homepage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "Halo, User",
-                              style: TextStyle(
+                              "Halo, $currentEmail",
+                              style: const TextStyle(
                                 fontFamily: "Poppins",
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
