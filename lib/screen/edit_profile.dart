@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 
-class EditProfile extends StatelessWidget {
+class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
+
+  @override
+  State<EditProfile> createState() => _EditProfileState();
+}
+
+class _EditProfileState extends State<EditProfile> {
+  //get auth servce session
+  final authService = AuthService();
+
+  final _namecontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,color: Color(0xff4D4D4D)),
+          icon: Icon(Icons.arrow_back, color: Color(0xff4D4D4D)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Edit Profile",
@@ -41,6 +52,7 @@ class EditProfile extends StatelessWidget {
                 height: 111,
               ),
               TextField(
+                controller: _namecontroller,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -63,7 +75,7 @@ class EditProfile extends StatelessWidget {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color.fromARGB(225, 242, 242, 242),
-                  labelText: "Username",
+                  labelText: "E-Mail",
                   labelStyle: TextStyle(
                     fontFamily: "Poppins",
                     fontSize: 12,

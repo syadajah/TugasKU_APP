@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/Auth/auth_gate.dart';
 import 'package:tugasku/Auth/auth_service.dart';
@@ -31,10 +30,9 @@ class _AuthLoginState extends State<AuthLogin> {
     //attempt login..
     try {
       await authService.signInWithEmailPassword(email, password);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => AuthGate()),
-      );
+      // ignore: use_build_context_synchronously
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) => AuthGate()));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -135,12 +133,11 @@ class _AuthLoginState extends State<AuthLogin> {
                               fontSize: 12,
                               color: Color.fromARGB(225, 128, 128, 128),
                             ),
-                            // prefixIcon: SvgPicture.asset("assets/icon/Mail.svg",
-                            //     width: 20,
-                            //     height: 20,
-                            //     colorFilter: ColorFilter.mode(
-                            //         Color.fromARGB(225, 128, 128, 128),
-                            //         BlendMode.srcIn)),
+                            prefixIcon: SvgPicture.asset("assets/icon/Mail.svg",
+                                fit: BoxFit.scaleDown,
+                                colorFilter: ColorFilter.mode(
+                                    Color.fromARGB(225, 128, 128, 128),
+                                    BlendMode.srcIn)),
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10),

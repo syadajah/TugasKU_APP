@@ -39,7 +39,7 @@ class _AuthRegisterState extends State<AuthRegister> {
 
     // attempt to sign up..
     try {
-      await authService.signUpWithEmailPassword(email, password);
+      await authService.signUpWithEmailPassword(email, password, "TugasKU");
       //pop this register page
       Navigator.pop(context);
     }
@@ -146,10 +146,8 @@ class _AuthRegisterState extends State<AuthRegister> {
                               fontSize: 12,
                               color: Color.fromARGB(225, 128, 128, 128),
                             ),
-                            prefixIcon: SvgPicture.asset(
-                                "assets/icon/Mail.svg",
-                                width: 5,
-                                height: 5,
+                            prefixIcon: SvgPicture.asset("assets/icon/Mail.svg",
+                                fit: BoxFit.scaleDown,
                                 colorFilter: ColorFilter.mode(
                                     Color.fromARGB(225, 128, 128, 128),
                                     BlendMode.srcIn)),

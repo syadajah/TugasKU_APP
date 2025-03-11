@@ -59,7 +59,7 @@ class _HomepageState extends State<Homepage> {
                               "Selamat datang!",
                               style: TextStyle(
                                 fontFamily: "Poppins",
-                                fontSize: 12,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff4D4D4D),
                               ),
@@ -68,10 +68,12 @@ class _HomepageState extends State<Homepage> {
                               "Halo, $currentEmail",
                               style: const TextStyle(
                                 fontFamily: "Poppins",
-                                fontSize: 16,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xff4D4D4D),
                               ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -86,11 +88,11 @@ class _HomepageState extends State<Homepage> {
                                     builder: (context) => History()),
                               );
                             },
-                            label: const Text(
+                            label: Text(
                               "Riwayat",
                               style: TextStyle(
                                 fontFamily: "Poppins",
-                                fontSize: 12,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xff4D4D4D),
                               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tugasku/Auth/auth_service.dart';
+import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/edit_profile.dart';
 
 class Profile extends StatefulWidget {
@@ -11,13 +12,25 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-
-  //get auth service 
+  //get auth service
   final authService = AuthService();
+  String? name;
+  String? email;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Map result = authService.getUserCurrentEmail();
+    name = result['name'];
+    email = result['email'];
+  }
 
   // logout button function/pressed
   void logout() async {
     await authService.signOut();
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => AuthLogin()));
   }
 
   @override
@@ -25,7 +38,10 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xffffffff),),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Color(0xffffffff),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Detail",
@@ -76,7 +92,7 @@ class _ProfileState extends State<Profile> {
                           child: Column(
                             children: [
                               Text(
-                                "User",
+                                "$name",
                                 style: TextStyle(
                                   color: Color(0xff4d4d4d),
                                   fontFamily: "Poppins",
@@ -86,7 +102,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               Text(
-                                "@username",
+                                "$email",
                                 style: TextStyle(
                                   color: Color(0xff4d4d4d),
                                   fontFamily: "Poppins",
