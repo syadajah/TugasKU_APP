@@ -28,7 +28,12 @@ class AuthGate extends StatelessWidget {
 
           if (session != null) {
             //If there is no session, navigate to Home page
-            return const Homepage();
+            return const Homepage(
+              name: 'Default Name',
+              description: 'Default Description',
+              deadline: 'Default Deadline',
+              category: 'Default Category',
+            );
           } else {
             //If there is a session, navigate to Login page
             return const AuthLogin();

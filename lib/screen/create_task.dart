@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tugasku/screen/homepage.dart';
+import 'package:tugasku/service/task_service.dart';
 
-class CreateTask extends StatelessWidget {
+class CreateTask extends StatefulWidget {
   const CreateTask({super.key});
+
+  @override
+  State<CreateTask> createState() => _CreateTaskState();
+}
+
+class _CreateTaskState extends State<CreateTask> {
+  final taskService = TaskCreate();
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController deadlineCodntroller = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +56,8 @@ class CreateTask extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: TextField(
+                    onSubmitted: (Value) => print(Value),
+                    controller: categoryController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -53,8 +69,7 @@ class CreateTask extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                       prefixIcon: Padding(
-                        padding: EdgeInsets.all(
-                            13.0), // Menghindari ikon terlalu besar
+                        padding: EdgeInsets.all(13.0),
                         child: SizedBox(
                           width: 15,
                           height: 15,
@@ -72,8 +87,7 @@ class CreateTask extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       suffixIcon: Padding(
-                        padding: EdgeInsets.all(
-                            10.0), // Menghindari ikon terlalu besar
+                        padding: EdgeInsets.all(10.0),
                         child: SizedBox(
                           width: 20,
                           height: 20,
@@ -95,10 +109,11 @@ class CreateTask extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: TextField(
+                    controller: nameController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
-                      hintText: "Nama project",
+                      hintText: "Nama Tugas",
                       hintStyle: TextStyle(
                         fontFamily: "Poppins",
                         fontSize: 12,
@@ -121,6 +136,7 @@ class CreateTask extends StatelessWidget {
                   height: 20,
                 ),
                 TextField(
+                  controller: descriptionController,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Color(0xfff2f2f2),
@@ -148,6 +164,7 @@ class CreateTask extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: TextField(
+                    controller: deadlineCodntroller,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -159,8 +176,7 @@ class CreateTask extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                       prefixIcon: Padding(
-                        padding: EdgeInsets.all(
-                            13.0), // Menghindari ikon terlalu besar
+                        padding: EdgeInsets.all(13.0),
                         child: SizedBox(
                           width: 15,
                           height: 15,
@@ -178,8 +194,7 @@ class CreateTask extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       suffixIcon: Padding(
-                        padding: EdgeInsets.all(
-                            10.0), // Menghindari ikon terlalu besar
+                        padding: EdgeInsets.all(10.0),
                         child: SizedBox(
                           width: 20,
                           height: 20,
@@ -201,7 +216,15 @@ class CreateTask extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) => Homepage(
+                                  name: nameController.text,
+                                  description: descriptionController.text,
+                                  deadline: deadlineCodntroller.text,
+                                  category: categoryController.text,
+                                )));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(225, 5, 38, 89),
                         foregroundColor: Colors.white,

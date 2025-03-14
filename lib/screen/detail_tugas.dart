@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
-class DetailTugas extends StatelessWidget {
+class DetailTugas extends StatefulWidget {
   const DetailTugas({super.key});
 
+  @override
+  State<DetailTugas> createState() => _DetailTugasState();
+}
+
+class _DetailTugasState extends State<DetailTugas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xff4D4D4D),),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Color(0xff4D4D4D),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Detail",
@@ -54,7 +63,11 @@ class DetailTugas extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.access_time, color: Color(0xff052659)),
+                        SvgPicture.asset(
+                          "assets/icon/Icondeadline.svg",
+                          width: 16,
+                          height: 16,
+                        ),
                         SizedBox(width: 4),
                         Text("6d",
                             style: TextStyle(

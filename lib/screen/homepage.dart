@@ -4,24 +4,48 @@ import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/create_task.dart';
 import 'package:tugasku/screen/history.dart';
 import 'package:tugasku/screen/profile.dart';
+import 'package:tugasku/service/task_service.dart';
+import 'package:tugasku/widget/category_card.dart';
+import 'package:tugasku/widget/task_card.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+  const Homepage({
+    super.key,
+    required this.name,
+    required this.description,
+    required this.deadline,
+    required this.category,
+  });
+
+  final String name;
+  final String description;
+  final String deadline;
+  final String category;
 
   @override
   State<Homepage> createState() => _HomepageState();
 }
 
 class _HomepageState extends State<Homepage> {
-
   //get auth service
   final authService = AuthService();
+  String? name;
+  String? email;
+
+  //get task service
+  final taskService = TaskCreate();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Map result = authService.getUserCurrentEmail();
+    name = result['name'];
+    email = result['email'];
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    final currentEmail = authService.getUserCurrentEmail();
-
 
     return Scaffold(
       body: SafeArea(
@@ -30,7 +54,7 @@ class _HomepageState extends State<Homepage> {
             width: MediaQuery.of(context).size.width,
             color: const Color(0xfff7f7f7),
             child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 20, top: 20),
+              padding: const EdgeInsets.only(left: 9, right: 13, top: 20),
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: Column(
@@ -65,7 +89,7 @@ class _HomepageState extends State<Homepage> {
                               ),
                             ),
                             Text(
-                              "Halo, $currentEmail",
+                              "Halo, $name",
                               style: const TextStyle(
                                 fontFamily: "Poppins",
                                 fontSize: 12,
@@ -147,7 +171,11 @@ class _HomepageState extends State<Homepage> {
                               color: Color(0xff4d4d4d),
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          CategoryCard(name: "default", taskCount: "default"),
+                          const SizedBox(height: 40),
                           const Text(
                             "Tugas yang sedang dikerjakan",
                             style: TextStyle(
@@ -156,6 +184,15 @@ class _HomepageState extends State<Homepage> {
                               fontWeight: FontWeight.w700,
                               color: Color(0xff4d4d4d),
                             ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          TaskCard(
+                            category: widget.category,
+                            name: widget.name,
+                            description: widget.description,
+                            deadline: widget.deadline,
                           ),
                         ],
                       ),

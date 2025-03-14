@@ -148,6 +148,7 @@ class _AuthLoginState extends State<AuthLogin> {
                         ),
                         SizedBox(height: 15),
                         TextField(
+                          obscureText: true,
                           controller: _passwordController,
                           decoration: InputDecoration(
                             filled: true,
