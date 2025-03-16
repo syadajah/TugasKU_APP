@@ -79,7 +79,12 @@ class _EditProfileState extends State<EditProfile> {
                   width: 300,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      await authService.updateDisplayName(_namecontroller.text);
+                      if(context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xff052659),
                       foregroundColor: Color(0xffffffff),

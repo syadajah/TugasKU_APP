@@ -14,6 +14,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   //get auth service
   final authService = AuthService();
+  Map<String, dynamic>? userData;
   String? name;
   String? email;
 
@@ -21,9 +22,17 @@ class _ProfileState extends State<Profile> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getUserData();
     Map result = authService.getUserCurrentEmail();
     name = result['name'];
     email = result['email'];
+  }
+
+  void getUserData() async {
+    final response = await authService.getCurrentUserData();
+    setState(() {
+      userData = response;
+    });
   }
 
   // logout button function/pressed
@@ -92,7 +101,7 @@ class _ProfileState extends State<Profile> {
                           child: Column(
                             children: [
                               Text(
-                                "$name",
+                                userData != null ? userData!['full_name'] : '-',
                                 style: TextStyle(
                                   color: Color(0xff4d4d4d),
                                   fontFamily: "Poppins",
@@ -102,7 +111,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               ),
                               Text(
-                                "$email",
+                                userData != null ? userData!['email'] : '-',
                                 style: TextStyle(
                                   color: Color(0xff4d4d4d),
                                   fontFamily: "Poppins",
@@ -113,13 +122,17 @@ class _ProfileState extends State<Profile> {
                               ),
                               SizedBox(height: 15),
                               ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
+                                onPressed: () async {
+                                  final result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => EditProfile(),
                                     ),
                                   );
+
+                                  if(result == true) {
+                                    getUserData();
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:

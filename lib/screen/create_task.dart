@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/homepage.dart';
 import 'package:tugasku/service/task_service.dart';
 
@@ -11,12 +12,67 @@ class CreateTask extends StatefulWidget {
 }
 
 class _CreateTaskState extends State<CreateTask> {
+  final authService = AuthService();
   final taskService = TaskCreate();
+
+  List<Map<String, dynamic>> categories = [];
+  Map<String, dynamic>? userData;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController deadlineCodntroller = TextEditingController();
+  final TextEditingController deadlineController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
+
+  int? selectedCategoryId;
+
+  @override
+  void initState() {
+    getCategories();
+    getUserData();
+    super.initState();
+  }
+
+  void getUserData() async {
+    final response = await authService.getCurrentUserData();
+    setState(() {
+      userData = response;
+    });
+  }
+
+  void getCategories() {
+    taskService.loadCategories().then((data) {
+      debugPrint('Data: $data');
+      setState(() {
+        categories = data;
+      });
+    });
+  }
+
+  Future<void> _handleSubmitted(String value) async {
+    if (value.isNotEmpty) {
+      final existingCategory = categories.firstWhere(
+          (c) => c['name'].toString().toLowerCase() == value.toLowerCase(),
+          orElse: () => {'id': null});
+
+      if (existingCategory.isNotEmpty && existingCategory['id'] != null) {
+        setState(() {
+          selectedCategoryId = existingCategory['id'];
+        });
+
+        return;
+      }
+
+      Map<String, dynamic>? newCategory =
+          await taskService.addNewCategory(value, categories);
+
+      if (newCategory != null) {
+        setState(() {
+          categories.add(newCategory);
+          selectedCategoryId = newCategory['id'];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,55 +108,96 @@ class _CreateTaskState extends State<CreateTask> {
                 SizedBox(
                   height: 50,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  child: TextField(
-                    onSubmitted: (Value) => print(Value),
-                    controller: categoryController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color.fromARGB(225, 242, 242, 242),
-                      hintText: "Kategori",
-                      hintStyle: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: 12,
-                        color: Color(0xff808080),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(13.0),
-                        child: SizedBox(
-                          width: 15,
-                          height: 15,
-                          child: SvgPicture.asset(
-                            "assets/icon/collection.svg",
-                            fit: BoxFit.contain,
-                          ),
+                // SizedBox(
+                //   width: MediaQuery.of(context).size.width,
+                //   height: 50,
+                //   child: TextField(
+                //     onSubmitted: (Value) => print(Value),
+                //     controller: categoryController,
+                //     decoration: InputDecoration(
+                //       filled: true,
+                //       fillColor: Color.fromARGB(225, 242, 242, 242),
+                //       hintText: "Kategori",
+                //       hintStyle: TextStyle(
+                //         fontFamily: "Poppins",
+                //         fontSize: 12,
+                //         color: Color(0xff808080),
+                //         fontWeight: FontWeight.w500,
+                //       ),
+                //       prefixIcon: Padding(
+                //         padding: EdgeInsets.all(13.0),
+                //         child: SizedBox(
+                //           width: 15,
+                //           height: 15,
+                //           child: SvgPicture.asset(
+                //             "assets/icon/collection.svg",
+                //             fit: BoxFit.contain,
+                //           ),
+                //         ),
+                //       ),
+                //       border: OutlineInputBorder(
+                //         borderSide: BorderSide(
+                //           color: Color(0xff808080),
+                //           width: 0.5,
+                //         ),
+                //         borderRadius: BorderRadius.circular(10),
+                //       ),
+                //       suffixIcon: Padding(
+                //         padding: EdgeInsets.all(10.0),
+                //         child: SizedBox(
+                //           width: 20,
+                //           height: 20,
+                //           child: SvgPicture.asset(
+                //             "assets/icon/arrow-down.svg",
+                //             fit: BoxFit.contain,
+                //           ),
+                //         ),
+                //       ),
+                //       contentPadding:
+                //           EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                //     ),
+                //   ),
+                // ),
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<String>.empty();
+                    }
+                    return categories.map((c) => c['name'] as String).where(
+                          (name) => name.toLowerCase().contains(
+                                textEditingValue.text.toLowerCase(),
+                              ),
+                        );
+                  },
+                  onSelected: (String value) {
+                    final selectedCategory = categories.firstWhere(
+                        (c) => c['name'] == value,
+                        orElse: () => {'id': null});
+                    setState(() {
+                      selectedCategoryId = selectedCategory['id'];
+                    });
+                  },
+                  fieldViewBuilder:
+                      (context, controller, focusNode, onEditingComplete) {
+                    return TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(
+                        labelText: 'Select or enter category',
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.check),
+                          onPressed: () {
+                            _handleSubmitted(controller.text);
+                            focusNode.unfocus();
+                          },
                         ),
                       ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color(0xff808080),
-                          width: 0.5,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      suffixIcon: Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: SvgPicture.asset(
-                            "assets/icon/arrow-down.svg",
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                    ),
-                  ),
+                      onSubmitted: (value) {
+                        _handleSubmitted(controller.text);
+                        focusNode.unfocus();
+                      },
+                    );
+                  },
                 ),
                 SizedBox(
                   height: 20,
@@ -164,7 +261,7 @@ class _CreateTaskState extends State<CreateTask> {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: TextField(
-                    controller: deadlineCodntroller,
+                    controller: deadlineController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -217,13 +314,25 @@ class _CreateTaskState extends State<CreateTask> {
                   height: 50,
                   child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => Homepage(
-                                  name: nameController.text,
-                                  description: descriptionController.text,
-                                  deadline: deadlineCodntroller.text,
-                                  category: categoryController.text,
-                                )));
+                        if (selectedCategoryId == null) {
+                          debugPrint("User haven't select category");
+                          return;
+                        }
+
+                        taskService.createTask(
+                          userId: userData!['id'],
+                          name: nameController.text,
+                          description: descriptionController.text,
+                          deadline: deadlineController.text,
+                          category: selectedCategoryId!,
+                        );
+                        // Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        //     builder: (context) => Homepage(
+                        //           name: nameController.text,
+                        //           description: descriptionController.text,
+                        //           deadline: deadlineCodntroller.text,
+                        //           category: categoryController.text,
+                        //         )));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(225, 5, 38, 89),

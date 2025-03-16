@@ -32,6 +32,9 @@ class _HomepageState extends State<Homepage> {
   String? name;
   String? email;
 
+  List<Map<String, dynamic>>? assignments;
+  Map<String, dynamic>? userData;
+
   //get task service
   final taskService = TaskCreate();
 
@@ -42,94 +45,112 @@ class _HomepageState extends State<Homepage> {
     Map result = authService.getUserCurrentEmail();
     name = result['name'];
     email = result['email'];
+
+    getAssignments();
+  }
+
+  Future<void> getUserData() async {
+    final response = await authService.getCurrentUserData();
+    setState(() {
+      userData = response;
+    });
+  }
+
+  void getAssignments() async {
+    await getUserData();
+    taskService.loadAssignments(userData!['id']).then((data) {
+      debugPrint('Data: $data');
+      setState(() {
+        assignments = data;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
             color: const Color(0xfff7f7f7),
             child: Padding(
               padding: const EdgeInsets.only(left: 9, right: 13, top: 20),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Profile()));
+                        },
+                        icon: const HeroIcon(
+                          HeroIcons.userCircle,
+                          size: 35,
+                          color: Color(0xff021024),
+                          style: HeroIconStyle.solid,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Selamat datang!",
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff4D4D4D),
+                            ),
+                          ),
+                          Text(
+                            "Halo, $name",
+                            style: const TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff4D4D4D),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        height: 38,
+                        child: ElevatedButton.icon(
                           onPressed: () {
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Profile()));
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => History()),
+                            );
                           },
-                          icon: const HeroIcon(
-                            HeroIcons.userCircle,
-                            size: 35,
-                            color: Color(0xff021024),
-                            style: HeroIconStyle.solid,
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Selamat datang!",
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff4D4D4D),
-                              ),
-                            ),
-                            Text(
-                              "Halo, $name",
-                              style: const TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xff4D4D4D),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        SizedBox(
-                          height: 38,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => History()),
-                              );
-                            },
-                            label: Text(
-                              "Riwayat",
-                              style: TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff4D4D4D),
-                              ),
-                            ),
-                            icon: const Icon(Icons.history, size: 18),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xffFFFFFF),
+                          label: Text(
+                            "Riwayat",
+                            style: TextStyle(
+                              fontFamily: "Poppins",
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff4D4D4D),
                             ),
                           ),
+                          icon: const Icon(Icons.history, size: 18),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffFFFFFF),
+                          ),
                         ),
-                      ],
-                    ),
-                    Container(
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: Container(
                       color: const Color(0xfff7f7f7),
                       width: MediaQuery.of(context).size.width,
                       padding: const EdgeInsets.all(20),
@@ -188,17 +209,43 @@ class _HomepageState extends State<Homepage> {
                           SizedBox(
                             height: 20,
                           ),
-                          TaskCard(
-                            category: widget.category,
-                            name: widget.name,
-                            description: widget.description,
-                            deadline: widget.deadline,
-                          ),
+                          assignments != null
+                              ? Expanded(
+                                  child: ListView.separated(
+                                    separatorBuilder: (context, index) =>
+                                        const SizedBox(
+                                      height: 10,
+                                    ),
+                                    shrinkWrap: true,
+                                    itemCount: assignments!.length,
+                                    itemBuilder: (context, index) {
+                                      return TaskCard(
+                                        category: assignments![index]
+                                                ['categories']['name']
+                                            .toString(),
+                                        name: assignments![index]['name']
+                                            .toString(),
+                                        description: assignments![index]
+                                                ['description']
+                                            .toString(),
+                                        deadline: assignments![index]
+                                                ['deadline']
+                                            .toString(),
+                                      );
+                                    },
+                                  ),
+                                )
+                              : Expanded(
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

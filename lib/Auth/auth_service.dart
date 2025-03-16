@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
@@ -29,5 +30,33 @@ class AuthService {
     String? email = user?.email;
     String? name = user?.userMetadata!['Name'];
     return {email: email, name: name};
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) return null;
+
+    return {
+      'id': user.id,
+      'email': user.email,
+      'full_name': user.userMetadata?['full_name'] ?? '-',
+      'created_at': user.createdAt,
+    };
+  }
+
+  Future<void> updateDisplayName(String newName) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final response = await _supabase.auth.updateUser(UserAttributes(data: {
+      'full_name': newName,
+    }));
+
+    if (response.user != null) {
+      debugPrint('User updated successfully');
+    } else {
+      debugPrint('Failed to update user');
+    }
   }
 }

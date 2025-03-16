@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class DetailTugas extends StatefulWidget {
-  const DetailTugas({super.key});
+    final String category;
+  final String name;
+  final String description;
+  final String deadline;
+  const DetailTugas({    super.key,
+    required this.category,
+    required this.name,
+    required this.description,
+    required this.deadline,});
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
@@ -45,7 +53,7 @@ class _DetailTugasState extends State<DetailTugas> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                     label: Text(
-                      "Produktif",
+                      widget.category,
                       style: TextStyle(
                           color: Color(0xff4d4d4d),
                           fontFamily: "Poppins",
@@ -69,7 +77,7 @@ class _DetailTugasState extends State<DetailTugas> {
                           height: 16,
                         ),
                         SizedBox(width: 4),
-                        Text("6d",
+                        Text(widget.deadline,
                             style: TextStyle(
                                 color: Color(0xff052659),
                                 fontFamily: "Poppins",
@@ -80,7 +88,7 @@ class _DetailTugasState extends State<DetailTugas> {
                 ],
               ),
               SizedBox(height: 16),
-              Text("UI/UX",
+              Text(widget.name,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -88,7 +96,7 @@ class _DetailTugasState extends State<DetailTugas> {
                       color: Color(0xff333333))),
               SizedBox(height: 20),
               Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque rhoncus...",
+                widget.description,
                 style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 12,

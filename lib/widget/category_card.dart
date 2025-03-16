@@ -10,7 +10,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){},
+      onTap: () {},
       child: Container(
         width: 130,
         height: 124,
@@ -46,7 +46,9 @@ class CategoryCard extends StatelessWidget {
                   fontSize: 10,
                   fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 15,),
+            SizedBox(
+              height: 15,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,

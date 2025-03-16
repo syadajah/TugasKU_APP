@@ -20,7 +20,12 @@ class TaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailTugas()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailTugas(
+          name: name,
+          category: category,
+          description: description,
+          deadline: deadline,
+        )));
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -118,11 +123,11 @@ void main() {
       backgroundColor: Colors.grey.shade100,
       body: Center(
         child: TaskCard(
-          category: 'Produktif',
-          name: 'UI/UX',
+          category: 'Default',
+          name: 'Default',
           description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque rhoncus rhoncus enim eu congue.',
-          deadline: '6d',
+              'Deafault',
+          deadline: 'Default',
         ),
       ),
     ),
