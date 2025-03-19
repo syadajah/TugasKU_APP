@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/homepage.dart';
+import 'package:tugasku/screen/splash.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -28,18 +28,11 @@ class AuthGate extends StatelessWidget {
 
           if (session != null) {
             //If there is no session, navigate to Home page
-            return const Homepage(
-              name: 'Default Name',
-              description: 'Default Description',
-              deadline: 'Default Deadline',
-              category: 'Default Category',
-            );
+            return const Homepage();
           } else {
             //If there is a session, navigate to Login page
-            return const AuthLogin();
+            return const Splash();
           }
-
-          
         });
   }
 }

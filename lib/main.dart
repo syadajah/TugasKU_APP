@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tugasku/screen/homepage.dart';
 import 'package:tugasku/screen/splash.dart';
 
 void main() async {
@@ -25,7 +26,32 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff7f7f7)),
         useMaterial3: true,
       ),
-      home: Splash(),
+      home: Wrapper(),
     );
+  }
+}
+
+class Wrapper extends StatelessWidget {
+  const Wrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: Supabase.instance.client.auth.onAuthStateChange,
+        builder: (context, snapshot) {
+          final authState = snapshot.data;
+
+          if (authState == null) {
+            return const Text("Login is error");
+          } else {
+            final session = authState.session;
+
+            if (session != null) {
+              return const Homepage();
+            } else {
+              return const Splash();
+            }
+          }
+        });
   }
 }

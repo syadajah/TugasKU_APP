@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tugasku/Auth/auth_service.dart';
-import 'package:tugasku/screen/homepage.dart';
 import 'package:tugasku/service/task_service.dart';
+import 'package:intl/intl.dart'; // Tambahkan package ini untuk format tanggal
 
 class CreateTask extends StatefulWidget {
   const CreateTask({super.key});
@@ -24,6 +24,7 @@ class _CreateTaskState extends State<CreateTask> {
   final TextEditingController categoryController = TextEditingController();
 
   int? selectedCategoryId;
+  DateTime? selectedDeadline; // Tambahkan variabel untuk menyimpan tanggal deadline
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _CreateTaskState extends State<CreateTask> {
     });
   }
 
-  void getCategories() {
+  void getCategories() async {
     taskService.loadCategories().then((data) {
       debugPrint('Data: $data');
       setState(() {
@@ -62,13 +63,49 @@ class _CreateTaskState extends State<CreateTask> {
         return;
       }
 
-      Map<String, dynamic>? newCategory =
-          await taskService.addNewCategory(value, categories);
+      Map<String, dynamic>? newCategory = await taskService.addNewCategory(
+        value,
+        categories,
+      );
 
       if (newCategory != null) {
         setState(() {
           categories.add(newCategory);
           selectedCategoryId = newCategory['id'];
+        });
+      }
+    }
+  }
+
+  void _showDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    
+    if (picked != null) {
+      // Tampilkan dialog untuk memilih waktu
+      final TimeOfDay? timePicked = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      
+      if (timePicked != null) {
+        // Gabungkan tanggal dan waktu
+        final DateTime deadline = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          timePicked.hour,
+          timePicked.minute,
+        );
+        
+        setState(() {
+          selectedDeadline = deadline;
+          // Format tanggal dan waktu untuk ditampilkan di TextField
+          deadlineController.text = DateFormat('dd-MM-yyyy HH:mm').format(deadline);
         });
       }
     }
@@ -108,56 +145,6 @@ class _CreateTaskState extends State<CreateTask> {
                 SizedBox(
                   height: 50,
                 ),
-                // SizedBox(
-                //   width: MediaQuery.of(context).size.width,
-                //   height: 50,
-                //   child: TextField(
-                //     onSubmitted: (Value) => print(Value),
-                //     controller: categoryController,
-                //     decoration: InputDecoration(
-                //       filled: true,
-                //       fillColor: Color.fromARGB(225, 242, 242, 242),
-                //       hintText: "Kategori",
-                //       hintStyle: TextStyle(
-                //         fontFamily: "Poppins",
-                //         fontSize: 12,
-                //         color: Color(0xff808080),
-                //         fontWeight: FontWeight.w500,
-                //       ),
-                //       prefixIcon: Padding(
-                //         padding: EdgeInsets.all(13.0),
-                //         child: SizedBox(
-                //           width: 15,
-                //           height: 15,
-                //           child: SvgPicture.asset(
-                //             "assets/icon/collection.svg",
-                //             fit: BoxFit.contain,
-                //           ),
-                //         ),
-                //       ),
-                //       border: OutlineInputBorder(
-                //         borderSide: BorderSide(
-                //           color: Color(0xff808080),
-                //           width: 0.5,
-                //         ),
-                //         borderRadius: BorderRadius.circular(10),
-                //       ),
-                //       suffixIcon: Padding(
-                //         padding: EdgeInsets.all(10.0),
-                //         child: SizedBox(
-                //           width: 20,
-                //           height: 20,
-                //           child: SvgPicture.asset(
-                //             "assets/icon/arrow-down.svg",
-                //             fit: BoxFit.contain,
-                //           ),
-                //         ),
-                //       ),
-                //       contentPadding:
-                //           EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                //     ),
-                //   ),
-                // ),
                 Autocomplete<String>(
                   optionsBuilder: (TextEditingValue textEditingValue) {
                     if (textEditingValue.text.isEmpty) {
@@ -183,7 +170,20 @@ class _CreateTaskState extends State<CreateTask> {
                       controller: controller,
                       focusNode: focusNode,
                       decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color(0xff808080),
+                            width: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         labelText: 'Select or enter category',
+                        labelStyle: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 12,
+                          color: Color(0xff808080),
+                          fontWeight: FontWeight.w500,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(Icons.check),
                           onPressed: () {
@@ -191,6 +191,8 @@ class _CreateTaskState extends State<CreateTask> {
                             focusNode.unfocus();
                           },
                         ),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                       ),
                       onSubmitted: (value) {
                         _handleSubmitted(controller.text);
@@ -261,7 +263,9 @@ class _CreateTaskState extends State<CreateTask> {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: TextField(
+                    onTap: _showDatePicker,
                     controller: deadlineController,
+                    readOnly: true, // Tambahkan readOnly agar tidak bisa edit manual
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -313,26 +317,32 @@ class _CreateTaskState extends State<CreateTask> {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (selectedCategoryId == null) {
-                          debugPrint("User haven't select category");
+                          // Tampilkan pesan error
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Pilih kategori terlebih dahulu')),
+                          );
                           return;
                         }
-
-                        taskService.createTask(
+                        
+                        if (selectedDeadline == null) {
+                          // Tampilkan pesan error
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Pilih tanggal deadline terlebih dahulu')),
+                          );
+                          return;
+                        }
+                        
+                        await taskService.createTask(
                           userId: userData!['id'],
                           name: nameController.text,
                           description: descriptionController.text,
-                          deadline: deadlineController.text,
+                          deadline: selectedDeadline!.toIso8601String(), // Gunakan format ISO
                           category: selectedCategoryId!,
                         );
-                        // Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        //     builder: (context) => Homepage(
-                        //           name: nameController.text,
-                        //           description: descriptionController.text,
-                        //           deadline: deadlineCodntroller.text,
-                        //           category: categoryController.text,
-                        //         )));
+
+                        Navigator.pop(context, true); // Kembalikan nilai true untuk trigger refresh
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(225, 5, 38, 89),

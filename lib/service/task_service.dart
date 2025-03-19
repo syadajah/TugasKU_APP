@@ -12,11 +12,14 @@ class TaskCreate {
     required int category,
   }) async {
     try {
+      // Ubah string deadline menjadi DateTime
+      DateTime deadlineDate = DateTime.parse(deadline);
+      
       await _supabase.from('assignment').insert([
         {
           "name": name,
           "description": description,
-          "deadline": DateTime.now().toIso8601String(),
+          "deadline": deadlineDate.toIso8601String(), // Simpan dalam format ISO
           "category_id": category,
           "user_id": userId,
         }
@@ -31,7 +34,6 @@ class TaskCreate {
       final response = await _supabase
           .from('categories')
           .select('id, name')
-          // .eq('user_id', currentLoggedInUserId)
           .order('created_at', ascending: false);
 
       return response
@@ -46,7 +48,7 @@ class TaskCreate {
     }
   }
 
-    Future<List<Map<String, dynamic>>> loadAssignments(String userId) async {
+  Future<List<Map<String, dynamic>>> loadAssignments(String userId) async {
     try {
       final response = await _supabase
           .from('assignment')
@@ -58,11 +60,10 @@ class TaskCreate {
           .map<Map<String, dynamic>>((row) => row)
           .toList();
     } catch (error) {
-      debugPrint("Error loading categories: $error");
+      debugPrint("Error loading assignments: $error");
       return [];
     }
   }
-
 
   Future<Map<String, dynamic>?> addNewCategory(
       String newCategory, List<Map<String, dynamic>> categories) async {
@@ -94,10 +95,13 @@ class TaskCreate {
   Future<void> updateTask(int id, String name, String description,
       String deadline, String category) async {
     try {
+      // Ubah string deadline menjadi DateTime
+      DateTime deadlineDate = DateTime.parse(deadline);
+      
       await _supabase.from('assignment').update({
         "name": name,
         "description": description,
-        "deadline": deadline,
+        "deadline": deadlineDate.toIso8601String(),
         "category_id": category
       }).eq('id', id);
     } catch (e) {
@@ -110,6 +114,29 @@ class TaskCreate {
       await _supabase.from('assignment').delete().eq('id', id);
     } catch (e) {
       debugPrint("Error saat menghapus tugas: $e");
+    }
+  }
+  
+  // Fungsi baru untuk format durasi
+  String formatDuration(DateTime deadline) {
+    DateTime now = DateTime.now();
+    Duration remainingTime = deadline.difference(now);
+    
+    int days = remainingTime.inDays;
+    int hours = remainingTime.inHours % 24;
+    int minutes = remainingTime.inMinutes % 60;
+    
+    // Cek jika tanggal sudah lewat
+    if (remainingTime.isNegative) {
+      return '$days';
+    }
+    
+    if (days > 0) {
+      return '$days''D';
+    } else if (hours > 0) {
+      return '$hours jam $minutes menit';
+    } else {
+      return '$minutes menit';
     }
   }
 }

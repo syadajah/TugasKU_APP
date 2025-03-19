@@ -1,24 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tugasku/service/task_service.dart';
 
 class DetailTugas extends StatefulWidget {
-    final String category;
+  final String category;
   final String name;
   final String description;
   final String deadline;
-  const DetailTugas({    super.key,
+
+  final TaskCreate _taskService = TaskCreate();
+
+
+  DetailTugas({
+    super.key,
     required this.category,
     required this.name,
     required this.description,
-    required this.deadline,});
+    required this.deadline,
+  });
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
+  
 }
 
 class _DetailTugasState extends State<DetailTugas> {
   @override
   Widget build(BuildContext context) {
+
+    // Parse deadline dari string ke DateTime
+    DateTime deadlineDate = DateTime.parse(widget.deadline);
+
+    // Hitung sisa waktu
+    String remainingTime = widget._taskService.formatDuration(deadlineDate);
+
+    // Tentukan warna berdasarkan sisa waktu
+    Color timeColor = Color(0xff052659);
+    if (deadlineDate.difference(DateTime.now()).inDays < 2) {
+      timeColor = Color(0xff991B1B);
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -77,9 +98,9 @@ class _DetailTugasState extends State<DetailTugas> {
                           height: 16,
                         ),
                         SizedBox(width: 4),
-                        Text(widget.deadline,
+                        Text(remainingTime,
                             style: TextStyle(
-                                color: Color(0xff052659),
+                                color: timeColor,
                                 fontFamily: "Poppins",
                                 fontWeight: FontWeight.w600)),
                       ],

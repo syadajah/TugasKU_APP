@@ -53,7 +53,7 @@ class _ProfileState extends State<Profile> {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Detail",
+        title: Text("Profile",
             style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontFamily: "Poppins",
@@ -94,7 +94,7 @@ class _ProfileState extends State<Profile> {
                     padding: const EdgeInsets.symmetric(horizontal: 23),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment
-                          .start, // Pastikan semua teks rata kiri
+                          .start,
                       children: [
                         SizedBox(height: 20),
                         Center(
@@ -107,7 +107,7 @@ class _ProfileState extends State<Profile> {
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.w700,
                                   fontSize: 24,
-                                  letterSpacing: -1,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
                               Text(
@@ -117,7 +117,7 @@ class _ProfileState extends State<Profile> {
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.w300,
                                   fontSize: 16,
-                                  letterSpacing: -1,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
                               SizedBox(height: 15),

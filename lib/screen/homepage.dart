@@ -9,18 +9,7 @@ import 'package:tugasku/widget/category_card.dart';
 import 'package:tugasku/widget/task_card.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({
-    super.key,
-    required this.name,
-    required this.description,
-    required this.deadline,
-    required this.category,
-  });
-
-  final String name;
-  final String description;
-  final String deadline;
-  final String category;
+  const Homepage({super.key});
 
   @override
   State<Homepage> createState() => _HomepageState();
@@ -29,11 +18,11 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   //get auth service
   final authService = AuthService();
-  String? name;
-  String? email;
 
   List<Map<String, dynamic>>? assignments;
   Map<String, dynamic>? userData;
+  String? name;
+  String? email;
 
   //get task service
   final taskService = TaskCreate();
@@ -42,11 +31,17 @@ class _HomepageState extends State<Homepage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getUserData();
     Map result = authService.getUserCurrentEmail();
     name = result['name'];
     email = result['email'];
 
     getAssignments();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> getUserData() async {
@@ -57,6 +52,11 @@ class _HomepageState extends State<Homepage> {
   }
 
   void getAssignments() async {
+    setState(() {
+      // Indicate loading state
+      assignments = null;
+    });
+
     await getUserData();
     taskService.loadAssignments(userData!['id']).then((data) {
       debugPrint('Data: $data');
@@ -109,7 +109,7 @@ class _HomepageState extends State<Homepage> {
                             ),
                           ),
                           Text(
-                            "Halo, $name",
+                            "Halo, ${userData != null ? userData!['full_name'] : '-'}",
                             style: const TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 12,
@@ -252,11 +252,14 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CreateTask()),
           );
+          if (result == true) {
+            getAssignments(); // Refresh data setelah kembali dari CreateTask
+          }
         },
         icon: const HeroIcon(
           HeroIcons.plus,
