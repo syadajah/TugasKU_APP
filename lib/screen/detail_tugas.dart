@@ -7,6 +7,7 @@ class DetailTugas extends StatefulWidget {
   final String name;
   final String description;
   final String deadline;
+  final String taskId;
 
   final TaskCreate _taskService = TaskCreate();
 
@@ -16,6 +17,7 @@ class DetailTugas extends StatefulWidget {
     required this.name,
     required this.description,
     required this.deadline,
+    required this.taskId,
   });
 
   @override
@@ -23,6 +25,8 @@ class DetailTugas extends StatefulWidget {
 }
 
 class _DetailTugasState extends State<DetailTugas> {
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     // Parse deadline dari string ke DateTime
@@ -179,19 +183,53 @@ class _DetailTugasState extends State<DetailTugas> {
                   SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              bool success = await widget._taskService
+                                  .completeTask(int.parse(widget.taskId));
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              if (success) {
+                                // Return true to indicate success
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Gagal menyelesaikan tugas!")));
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Gagal menyelesaikan tugas!")));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Tugas selesai!")));
+                                Navigator.pop(context, true);
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xff052659),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: Text("Selesai",
-                          style: TextStyle(
-                              color: Color(0xffffffff),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.5,
-                              fontSize: 12)),
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text("Selesai",
+                              style: TextStyle(
+                                  color: Color(0xffffffff),
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.5,
+                                  fontSize: 12)),
                     ),
                   ),
                 ],

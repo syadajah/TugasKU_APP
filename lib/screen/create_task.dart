@@ -24,7 +24,7 @@ class _CreateTaskState extends State<CreateTask> {
   final TextEditingController categoryController = TextEditingController();
 
   int? selectedCategoryId;
-  DateTime? selectedDeadline; // Tambahkan variabel untuk menyimpan tanggal deadline
+  DateTime? selectedDeadline;
 
   @override
   void initState() {
@@ -340,7 +340,7 @@ class _CreateTaskState extends State<CreateTask> {
                           userId: userData!['id'],
                           name: nameController.text,
                           description: descriptionController.text,
-                          deadline: selectedDeadline!.toIso8601String(), // Gunakan format ISO
+                          deadline: selectedDeadline!.toIso8601String(),
                           category: selectedCategoryId!,
                         );
 

@@ -8,6 +8,7 @@ class TaskCard extends StatelessWidget {
   final String name;
   final String description;
   final String deadline;
+  final String taskId;
 
   final TaskCreate _taskService = TaskCreate();
 
@@ -17,6 +18,7 @@ class TaskCard extends StatelessWidget {
     required this.name,
     required this.description,
     required this.deadline,
+    required this.taskId,
   });
 
   @override
@@ -45,11 +47,17 @@ class TaskCard extends StatelessWidget {
                       category: category,
                       description: description,
                       deadline: deadline,
-                    )));
+                      taskId: taskId,
+                    ))).then((result) {
+          if (result == true) {
+            // Make sure parent screen gets refreshed
+            Navigator.pop(context, true);
+          }
+        });
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(left: 5,right:5, top:5),
+        margin: EdgeInsets.only(left: 5, right: 5, top: 5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),

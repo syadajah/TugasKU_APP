@@ -62,7 +62,7 @@ List<Map<String, dynamic>> getUniqueCategories() {
     int categoryId = assignment['categories']['id'];
     String categoryName = assignment['categories']['name'];
     
-    // Jika categoryId belum ada di map, tambahkan
+    // Penambahan jika kategori id belum ada di map
     if (!uniqueCategoriesMap.containsKey(categoryId)) {
       uniqueCategoriesMap[categoryId] = {
         'id': categoryId,
@@ -72,7 +72,7 @@ List<Map<String, dynamic>> getUniqueCategories() {
       };
     }
     
-    // Tambahkan perhitungan untuk kategori ini
+    // Tambahkan perhitungan untuk kategori
     uniqueCategoriesMap[categoryId]?['count'] = uniqueCategoriesMap[categoryId]?['count'] + 1;
     int count = uniqueCategoriesMap[categoryId]?['count'];
     uniqueCategoriesMap[categoryId]?['task_count'] = "$count Tugas";
@@ -296,6 +296,8 @@ List<Map<String, dynamic>> getUniqueCategories() {
                                         deadline: assignments![index]
                                                 ['deadline']
                                             .toString(),
+                                        taskId: assignments![index]['id'].toString(),
+                                            
                                       );
                                     },
                                   ),

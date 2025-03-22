@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/edit_profile.dart';

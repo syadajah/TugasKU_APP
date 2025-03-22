@@ -57,7 +57,7 @@ class _EditProfileState extends State<EditProfile> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Color.fromARGB(225, 242, 242, 242),
-                    labelText: "Name",
+                    hintText: "Name",
                     labelStyle: TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 12,
