@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/service/task_service.dart';
-import 'package:intl/intl.dart'; // Tambahkan package ini untuk format tanggal
+import 'package:intl/intl.dart';
 
 class CreateTask extends StatefulWidget {
   const CreateTask({super.key});
@@ -170,6 +170,8 @@ class _CreateTaskState extends State<CreateTask> {
                       controller: controller,
                       focusNode: focusNode,
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Color.fromARGB(225, 242, 242, 242),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: Color(0xff808080),
@@ -177,7 +179,7 @@ class _CreateTaskState extends State<CreateTask> {
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        labelText: 'Select or enter category',
+                        labelText: 'Pilih atau buat kategori',
                         labelStyle: TextStyle(
                           fontFamily: "Poppins",
                           fontSize: 12,
@@ -341,6 +343,8 @@ class _CreateTaskState extends State<CreateTask> {
                           deadline: selectedDeadline!.toIso8601String(), // Gunakan format ISO
                           category: selectedCategoryId!,
                         );
+
+                        await taskService.getTaskCountByCategory(selectedCategoryId!);
 
                         Navigator.pop(context, true); // Kembalikan nilai true untuk trigger refresh
                       },

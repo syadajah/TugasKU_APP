@@ -51,6 +51,37 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+List<Map<String, dynamic>> getUniqueCategories() {
+  if (assignments == null) return [];
+  
+  // Buat map untuk menyimpan kategori unik dan menghitung jumlah tugas
+  Map<int, Map<String, dynamic>> uniqueCategoriesMap = {};
+  
+  // Loop melalui assignments dan tambahkan kategori ke map
+  for (var assignment in assignments!) {
+    int categoryId = assignment['categories']['id'];
+    String categoryName = assignment['categories']['name'];
+    
+    // Jika categoryId belum ada di map, tambahkan
+    if (!uniqueCategoriesMap.containsKey(categoryId)) {
+      uniqueCategoriesMap[categoryId] = {
+        'id': categoryId,
+        'name': categoryName,
+        'task_count': "0", // Inisialisasi dengan 0
+        'count': 0, // Counter internal
+      };
+    }
+    
+    // Tambahkan perhitungan untuk kategori ini
+    uniqueCategoriesMap[categoryId]?['count'] = uniqueCategoriesMap[categoryId]?['count'] + 1;
+    int count = uniqueCategoriesMap[categoryId]?['count'];
+    uniqueCategoriesMap[categoryId]?['task_count'] = "$count Tugas";
+  }
+  
+  // Konversi map ke list
+  return uniqueCategoriesMap.values.toList();
+}
+
   void getAssignments() async {
     setState(() {
       // Indicate loading state
@@ -68,6 +99,9 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final uniqueCategories = getUniqueCategories();
+    
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -184,7 +218,7 @@ class _HomepageState extends State<Homepage> {
                           ),
                           const SizedBox(height: 30),
                           const Text(
-                            "Kategori",
+                            "Kategori dan jumlah tugas",
                             style: TextStyle(
                               fontFamily: "Poppins",
                               fontSize: 12,
@@ -195,7 +229,38 @@ class _HomepageState extends State<Homepage> {
                           const SizedBox(
                             height: 20,
                           ),
-                          CategoryCard(name: "default", taskCount: "default"),
+                          uniqueCategories.isNotEmpty
+                              ? SizedBox(
+                                  height: 135,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: ListView.separated(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 5, vertical: 5),
+                                    scrollDirection: Axis.horizontal,
+                                    itemBuilder: (context, index) {
+                                      // Pastikan nilai categoryId dari assignments
+                                      int categoryId = uniqueCategories[index]['id'];
+
+                                      return CategoryCard(
+                                        category: uniqueCategories[index]['name']
+                                            .toString(),
+                                        taskCount: uniqueCategories[index]['task_count']
+                                            .toString(),
+                                        categoryId: categoryId,
+                                      );
+                                    },
+                                    separatorBuilder: (context, index) =>
+                                        const SizedBox(width: 10),
+                                    shrinkWrap: true,
+                                    itemCount: uniqueCategories.length,
+                                  ),
+                                )
+                              : Expanded(
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
                           const SizedBox(height: 40),
                           const Text(
                             "Tugas yang sedang dikerjakan",

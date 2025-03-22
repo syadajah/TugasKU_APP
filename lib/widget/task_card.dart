@@ -29,8 +29,10 @@ class TaskCard extends StatelessWidget {
 
     // Tentukan warna berdasarkan sisa waktu
     Color timeColor = Color(0xff052659);
+    Color bgTimeColor = Color(0x20052659);
     if (deadlineDate.difference(DateTime.now()).inDays < 2) {
       timeColor = Color(0xff991B1B);
+      bgTimeColor = Color(0x20991B1B);
     }
 
     return GestureDetector(
@@ -47,6 +49,7 @@ class TaskCard extends StatelessWidget {
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
+        margin: EdgeInsets.only(left: 5,right:5, top:5),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -54,8 +57,8 @@ class TaskCard extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
               offset: Offset(0, 4),
-              blurRadius: 10,
-              spreadRadius: 2,
+              blurRadius: 4,
+              spreadRadius: 2.5,
             ),
           ],
         ),
@@ -86,10 +89,10 @@ class TaskCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: bgTimeColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Color(0xff052659),
+                        color: timeColor,
                         width: 1,
                       ),
                     ),
@@ -100,6 +103,10 @@ class TaskCard extends StatelessWidget {
                           "assets/icon/Icondeadline.svg",
                           width: 16,
                           height: 16,
+                          colorFilter: ColorFilter.mode(
+                            timeColor,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         SizedBox(width: 4),
                         Text(

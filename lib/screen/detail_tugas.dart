@@ -10,7 +10,6 @@ class DetailTugas extends StatefulWidget {
 
   final TaskCreate _taskService = TaskCreate();
 
-
   DetailTugas({
     super.key,
     required this.category,
@@ -21,13 +20,11 @@ class DetailTugas extends StatefulWidget {
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
-  
 }
 
 class _DetailTugasState extends State<DetailTugas> {
   @override
   Widget build(BuildContext context) {
-
     // Parse deadline dari string ke DateTime
     DateTime deadlineDate = DateTime.parse(widget.deadline);
 
@@ -36,8 +33,10 @@ class _DetailTugasState extends State<DetailTugas> {
 
     // Tentukan warna berdasarkan sisa waktu
     Color timeColor = Color(0xff052659);
+    Color bgTimeColor = Color(0x20052659);
     if (deadlineDate.difference(DateTime.now()).inDays < 2) {
       timeColor = Color(0xff991B1B);
+      bgTimeColor = Color(0x20991B1B);
     }
 
     return Scaffold(
@@ -86,9 +85,9 @@ class _DetailTugasState extends State<DetailTugas> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Color(0x15052659),
+                      color: bgTimeColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Color(0xff052659)),
+                      border: Border.all(color: timeColor),
                     ),
                     child: Row(
                       children: [
@@ -96,6 +95,8 @@ class _DetailTugasState extends State<DetailTugas> {
                           "assets/icon/Icondeadline.svg",
                           width: 16,
                           height: 16,
+                          colorFilter:
+                              ColorFilter.mode(timeColor, BlendMode.srcIn),
                         ),
                         SizedBox(width: 4),
                         Text(remainingTime,

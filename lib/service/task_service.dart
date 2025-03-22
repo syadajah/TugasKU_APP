@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TaskCreate {
   final SupabaseClient _supabase = Supabase.instance.client;
+  
 
   Future<void> createTask({
     required String userId,
@@ -34,6 +35,7 @@ class TaskCreate {
       final response = await _supabase
           .from('categories')
           .select('id, name')
+          .eq('user_id', _supabase.auth.currentUser!.id)
           .order('created_at', ascending: false);
 
       return response
@@ -65,6 +67,28 @@ class TaskCreate {
     }
   }
 
+  // Menghitung jumlah tugas per kategori
+  Map<String, int> countTaskByCategory(List<Map<String, dynamic>> tasks) {
+    Map<String, int> result = {};
+    
+    for (var task in tasks) {
+      // Pastikan task memiliki data categories
+      if (task['categories'] != null) {
+        String categoryName = task['categories']['name'];
+        
+        // Jika kategori sudah ada di map, tambahkan count
+        if (result.containsKey(categoryName)) {
+          result[categoryName] = result[categoryName]! + 1;
+        } else {
+          // Jika kategori belum ada, inisialisasi dengan 1
+          result[categoryName] = 1;
+        }
+      }
+    }
+    
+    return result;
+  }
+
   Future<Map<String, dynamic>?> addNewCategory(
       String newCategory, List<Map<String, dynamic>> categories) async {
     try {
@@ -79,7 +103,7 @@ class TaskCreate {
 
       final response = await _supabase
           .from('categories')
-          .insert({'name': newCategory})
+          .insert({'name': newCategory, 'user_id': _supabase.auth.currentUser!.id})
           .select('id, name')
           .maybeSingle();
 
@@ -108,6 +132,23 @@ class TaskCreate {
       debugPrint("Error saat memperbarui tugas: $e");
     }
   }
+
+  // Menghitung jumlah tugas berdasarkan kategori tertentu
+  Future<String> getTaskCountByCategory(int categoryId) async {
+    try {
+      final response = await _supabase
+          .from('assignment')
+          .select('id')
+          .eq('category_id', categoryId);
+      
+      int count = response.length;
+      return '$count Tugas';
+    } catch (e) {
+      debugPrint("Error saat menghitung tugas per kategori: $e");
+      return '0 Tugas';
+    }
+  }
+
 
   Future<void> deleteTask(int id) async {
     try {

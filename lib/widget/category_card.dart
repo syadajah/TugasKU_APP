@@ -1,11 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tugasku/service/task_service.dart';
 
-class CategoryCard extends StatelessWidget {
-  final String name;
+class CategoryCard extends StatefulWidget {
+  final String category;
   final String taskCount;
+  final int categoryId; // Tambahkan categoryId
 
-  const CategoryCard({super.key, required this.name, required this.taskCount});
+  const CategoryCard({
+    super.key, 
+    required this.category, 
+    required this.taskCount,
+    required this.categoryId, // Tambahkan parameter ini
+  });
+
+  @override
+  State<CategoryCard> createState() => _CategoryCardState();
+}
+
+class _CategoryCardState extends State<CategoryCard> {
+  final TaskCreate _taskService = TaskCreate();
+  String taskCount = "0 Tugas"; // Default sebelum data dimuat
+
+  @override
+  void initState() {
+    super.initState();
+    // Inisialisasi taskCount dari prop
+    taskCount = widget.taskCount;
+    
+    // Jika taskCount kosong atau tidak berformat "X Tugas", muat dari DB
+    if (taskCount.isEmpty || !taskCount.contains("Tugas")) {
+      _loadTaskCount();
+    }
+  }
+
+  // Fungsi untuk memuat jumlah tugas
+  Future<void> _loadTaskCount() async {
+    final count = await _taskService.getTaskCountByCategory(widget.categoryId);
+    
+    if (mounted) {
+      setState(() {
+        taskCount = count;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +69,7 @@ class CategoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              name,
+              widget.category,
               style: TextStyle(
                   color: Color(0xffffffff),
                   fontFamily: "Poppins",
@@ -39,6 +77,7 @@ class CategoryCard extends StatelessWidget {
                   fontWeight: FontWeight.w700),
             ),
             Text(
+              // Gunakan state taskCount
               taskCount,
               style: TextStyle(
                   color: Color(0xffffffff),
@@ -65,17 +104,4 @@ class CategoryCard extends StatelessWidget {
       ),
     );
   }
-}
-
-void main() {
-  runApp(
-    MaterialApp(
-      home: Scaffold(
-        backgroundColor: Color(0xffffffff),
-        body: Center(
-          child: CategoryCard(name: "Produktif", taskCount: "1 tugas"),
-        ),
-      ),
-    ),
-  );
 }

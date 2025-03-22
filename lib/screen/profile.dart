@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:tugasku/Auth/auth_service.dart';
 import 'package:tugasku/screen/auth_login.dart';
 import 'package:tugasku/screen/edit_profile.dart';
@@ -51,7 +52,9 @@ class _ProfileState extends State<Profile> {
             Icons.arrow_back,
             color: Color(0xffffffff),
           ),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: ()  {
+            Navigator.pop(context, true);
+                    },
         ),
         title: Text("Profile",
             style: TextStyle(
