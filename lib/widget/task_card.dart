@@ -12,14 +12,13 @@ class TaskCard extends StatelessWidget {
 
   final TaskCreate _taskService = TaskCreate();
 
-  TaskCard({
-    super.key,
-    required this.category,
-    required this.name,
-    required this.description,
-    required this.deadline,
-    required this.taskId,
-  });
+  TaskCard(
+      {super.key,
+      required this.category,
+      required this.name,
+      required this.description,
+      required this.deadline,
+      required this.taskId});
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +42,12 @@ class TaskCard extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => DetailTugas(
+                      taskId: taskId,
                       name: name,
                       category: category,
                       description: description,
                       deadline: deadline,
-                      taskId: taskId,
+                    
                     ))).then((result) {
           if (result == true) {
             // Make sure parent screen gets refreshed

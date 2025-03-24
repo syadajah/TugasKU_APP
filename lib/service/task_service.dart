@@ -1,16 +1,36 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+//status enum
+enum TaskStatus {
+  uncompleted,
+  completed,
+}
+
+//extension konversi antara string dan enum
+extension TaskStatusExtension on TaskStatus {
+  String toShortString() {
+    return toString().split('.').last;
+  }
+
+  static TaskStatus fromString(String status) {
+    return TaskStatus.values.firstWhere((e) => e.toShortString() == status,
+        orElse: () => TaskStatus.uncompleted);
+  }
+}
 
 class TaskCreate {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<void> createTask({
-    required String userId,
-    required String name,
-    required String description,
-    required String deadline,
-    required int category,
-  }) async {
+  Future<void> createTask(
+      {required String userId,
+      required String name,
+      required String description,
+      required String deadline,
+      required int category,
+      String? image}) async {
     try {
       // Ubah string deadline menjadi DateTime
       DateTime deadlineDate = DateTime.parse(deadline);
@@ -22,6 +42,8 @@ class TaskCreate {
           "deadline": deadlineDate.toIso8601String(),
           "category_id": category,
           "user_id": userId,
+          "status": TaskStatus.uncompleted.toShortString(),
+          "image": image
         }
       ]);
     } catch (e) {
@@ -53,15 +75,141 @@ class TaskCreate {
     try {
       final response = await _supabase
           .from('assignment')
-          .select('*, categories(name, id)')
+          .select('*, categories(name, id)') // Tetap sama
           .eq('user_id', userId)
+          .eq('status', TaskStatus.uncompleted.toShortString())
           .order('created_at', ascending: false);
 
-      return response.map<Map<String, dynamic>>((row) => row).toList();
+      DateTime now = DateTime.now();
+
+      //Filter tugas yang unexpired
+      List<Map<String, dynamic>> activeTasks =
+          response.map<Map<String, dynamic>>((row) => row).where((task) {
+        DateTime deadline = DateTime.parse(task['deadline']);
+        return deadline.isAfter(now); //menampilkan tugas yang unexpired
+      }).toList();
+
+      return activeTasks;
     } catch (error) {
       debugPrint("Error loading assignments: $error");
       return [];
     }
+  }
+
+  // Methods that need changes in task_service.dart
+
+  Future<String?> uploadTaskImage(File imageFile, String taskId) async {
+    try {
+      final String fileName =
+          'task_${taskId}_${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
+      final String storagePath = 'uploads/$fileName';
+
+      // Upload file ke Supabase Storage
+      final response =
+          await _supabase.storage.from('image').upload(storagePath, imageFile);
+      debugPrint("Upload response: $response");
+
+      // Dapatkan URL publik untuk gambar
+      final String imageUrl =
+          _supabase.storage.from('image').getPublicUrl(storagePath);
+
+      // CHANGED: Parse taskId to int before using it to update the record
+      await _supabase
+          .from('assignment')
+          .update({'image': imageUrl}).eq('id', int.parse(taskId));
+
+      return imageUrl;
+    } catch (e) {
+      debugPrint("Error uploading task image: $e");
+      return null;
+    }
+  }
+
+  // Method untuk hapus gambar tugas
+  Future<bool> deleteTaskImage(String taskId) async {
+    try {
+      // Dapatkan data tugas termasuk URL gambar
+      final response = await _supabase
+          .from('assignment')
+          .select('image')
+          .eq('id', int.parse(taskId))
+          .single();
+
+      final String? imageUrl = response['image'];
+
+      if (imageUrl != null) {
+        // Extract path dari URL
+        final Uri uri = Uri.parse(imageUrl);
+        final String imagePath = uri.pathSegments.sublist(2).join('/');
+
+        // Hapus file dari storage
+        await _supabase.storage.from('image').remove([imagePath]);
+
+        // Update task dengan null image
+        await _supabase
+            .from('assignment')
+            .update({'image': null}).eq('id', int.parse(taskId));
+
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      debugPrint("Error deleting task image: $e");
+      return false;
+    }
+  }
+
+  //Task completed
+  Future<bool> completeTask(int taskId) async {
+    try {
+      DateTime now = DateTime.now();
+      await _supabase.from('assignment').update({
+        'status': TaskStatus.completed.toShortString(),
+        'completed_at': now.toIso8601String()
+      }).eq('id', taskId);
+      return true;
+    } catch (e) {
+      debugPrint("Error completed assignment: $e");
+      return false;
+    }
+  }
+
+  //Load tugas yang sudah selesai/expired
+  Future<List<Map<String, dynamic>>> loadHistoryTasks(String userId) async {
+    try {
+      final response = await _supabase
+          .from('assignment')
+          .select('*, categories(name, id)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      DateTime now = DateTime.now();
+
+      //filter menampilkan tugas yang sudah selesai/expired
+      List<Map<String, dynamic>> historyTask =
+          response.map<Map<String, dynamic>>((row) => row).where((task) {
+        DateTime deadline = DateTime.parse(task['deadline']);
+        bool isCompleted =
+            task['status'] == TaskStatus.completed.toShortString();
+        bool isExpired = deadline.isBefore(now) &&
+            task['status'] == TaskStatus.uncompleted.toShortString();
+
+        return isCompleted || isExpired;
+      }).toList();
+
+      return historyTask;
+    } catch (error) {
+      debugPrint("Error Load history task $error");
+      return [];
+    }
+  }
+
+  bool isTaskExpired(Map<String, dynamic> task) {
+    DateTime deadline = DateTime.parse(task['deadline']);
+    DateTime now = DateTime.now();
+    return deadline.isBefore(now) &&
+        task['status'] == TaskStatus.uncompleted.toShortString();
   }
 
   // Menghitung jumlah tugas per kategori
@@ -120,11 +268,13 @@ class TaskCreate {
       // Ubah string deadline menjadi DateTime
       DateTime deadlineDate = DateTime.parse(deadline);
 
+      int categoryId = int.parse(category);
+
       await _supabase.from('assignment').update({
         "name": name,
         "description": description,
         "deadline": deadlineDate.toIso8601String(),
-        "category_id": category
+        "category_id": categoryId
       }).eq('id', id);
     } catch (e) {
       debugPrint("Error saat memperbarui tugas: $e");
@@ -134,117 +284,24 @@ class TaskCreate {
   // Menghitung jumlah tugas berdasarkan kategori tertentu
   Future<String> getTaskCountByCategory(int categoryId) async {
     try {
+      DateTime now = DateTime.now();
+
       final response = await _supabase
           .from('assignment')
           .select('id')
-          .eq('category_id', categoryId);
+          .eq('category_id', categoryId)
+          .eq('status', TaskStatus.uncompleted.toShortString());
 
-      int count = response.length;
+      final activeTasks = response.where((task) {
+        DateTime deadline = DateTime.parse(task['deadline']);
+        return deadline.isAfter(now);
+      }).toList();
+
+      int count = activeTasks.length;
       return '$count Tugas';
     } catch (e) {
       debugPrint("Error saat menghitung tugas per kategori: $e");
       return '0 Tugas';
-    }
-  }
-
-  void validateTaskData(Map<String, dynamic> task) {
-    final requiredFields = [
-      'user_id',
-      'name',
-      'description',
-      'deadline',
-      'category_id'
-    ];
-    final missingFields =
-        requiredFields.where((field) => task[field] == null).toList();
-
-    if (missingFields.isNotEmpty) {
-      debugPrint("Missing required fields: $missingFields");
-      throw Exception("Task data missing required fields: $missingFields");
-    }
-
-    try {
-      DateTime.parse(task['deadline']);
-    } catch (e) {
-      debugPrint("Invalid deadline format: ${task['deadline']}");
-      throw Exception("Invalid deadline format in task data");
-    }
-  }
-
-  Future<bool> completeTask(int taskId) async {
-    try {
-      debugPrint("Attempting to complete task with ID: $taskId");
-
-      // Get Task From assignment (Data tugas dari tabel assignment)
-      final task = await _supabase
-          .from('assignment')
-          .select('*')
-          .eq('id', taskId)
-          .single();
-
-      debugPrint("Task found: ${task.toString()}");
-
-      final taskData = {
-        'user_id': task['user_id'],
-        'name': task['name'],
-        'description': task['description'],
-        'deadline': task['deadline'],
-        'category_id': task['category_id'],
-        'completed_at': DateTime.now().toIso8601String(),
-        'task_id': taskId.toString(),
-      };
-
-      // Insert into completed_task (Insert data assignment ke table completed_task)
-      await _supabase.from('completed_task').insert(taskData);
-      debugPrint("Task inserted into completed_task table");
-
-      // Delete data assignment
-      await _supabase.from('assignment').delete().eq('id', taskId);
-      debugPrint("Task deleted from assignment table");
-
-      return true;
-    } catch (e) {
-      debugPrint("Complete error in completeTask: $e");
-      return false;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> loadCompletedTasks(String userId) async {
-    try {
-      List<Map<String, dynamic>> results = [];
-
-      try {
-        final response = await _supabase
-            .from('task_completed')
-            .select('*, categories(name, id)')
-            .eq('user_id', userId)
-            .order('completed_at', ascending: false);
-
-        results = response.map<Map<String, dynamic>>((row) => row).toList();
-        debugPrint("Found ${results.length} tasks in task_completed table");
-      } catch (e) {
-        debugPrint("Error loading from task_completed: $e");
-      }
-
-      if (results.isEmpty) {
-        try {
-          final response = await _supabase
-              .from('completed_task')
-              .select('*, categories(name, id)')
-              .eq('user_id', userId)
-              .order('completed_at', ascending: false);
-
-          results = response.map<Map<String, dynamic>>((row) => row).toList();
-          debugPrint("Found ${results.length} tasks in completed_task table");
-        } catch (e) {
-          debugPrint("Error loading from completed_task: $e");
-        }
-      }
-
-      return results;
-    } catch (error) {
-      debugPrint("Error loading completed tasks: $error");
-      return [];
     }
   }
 
@@ -256,7 +313,7 @@ class TaskCreate {
     }
   }
 
-  // Fungsi baru untuk format durasi
+  // Format durasi/deadline
   String formatDuration(DateTime deadline) {
     DateTime now = DateTime.now();
     Duration remainingTime = deadline.difference(now);
@@ -264,11 +321,6 @@ class TaskCreate {
     int days = remainingTime.inDays;
     int hours = remainingTime.inHours % 24;
     int minutes = remainingTime.inMinutes % 60;
-
-    // Cek jika tanggal sudah lewat
-    if (remainingTime.isNegative) {
-      return 'Lewat deadline';
-    }
 
     if (days > 0) {
       return '$days' 'D';

@@ -5,13 +5,12 @@ import 'package:tugasku/service/task_service.dart';
 class CategoryCard extends StatefulWidget {
   final String category;
   final String taskCount;
-  final int categoryId; // Tambahkan categoryId
-
+  final int categoryId;
   const CategoryCard({
-    super.key, 
-    required this.category, 
+    super.key,
+    required this.category,
     required this.taskCount,
-    required this.categoryId, // Tambahkan parameter ini
+    required this.categoryId,
   });
 
   @override
@@ -21,27 +20,44 @@ class CategoryCard extends StatefulWidget {
 class _CategoryCardState extends State<CategoryCard> {
   final TaskCreate _taskService = TaskCreate();
   String taskCount = "0 Tugas"; // Default sebelum data dimuat
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     // Inisialisasi taskCount dari prop
     taskCount = widget.taskCount;
-    
+
     // Jika taskCount kosong atau tidak berformat "X Tugas", muat dari DB
     if (taskCount.isEmpty || !taskCount.contains("Tugas")) {
-      _loadTaskCount();
+      loadTaskCount();
     }
   }
 
-  // Fungsi untuk memuat jumlah tugas
-  Future<void> _loadTaskCount() async {
-    final count = await _taskService.getTaskCountByCategory(widget.categoryId);
+  Future<void> loadTaskCount() async {
+    // Hindari multiple calls
+    if (_isLoading) return;
     
-    if (mounted) {
-      setState(() {
-        taskCount = count;
-      });
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final count = await _taskService.getTaskCountByCategory(widget.categoryId);
+
+      if (mounted) {
+        setState(() {
+          taskCount = count;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Handle error
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -78,7 +94,7 @@ class _CategoryCardState extends State<CategoryCard> {
             ),
             Text(
               // Gunakan state taskCount
-              taskCount,
+              _isLoading ? "Memuat..." : taskCount,
               style: TextStyle(
                   color: Color(0xffffffff),
                   fontFamily: "Poppins",

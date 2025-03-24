@@ -51,9 +51,9 @@ class _ProfileState extends State<Profile> {
             Icons.arrow_back,
             color: Color(0xffffffff),
           ),
-          onPressed: ()  {
+          onPressed: () async {
             Navigator.pop(context, true);
-                    },
+          },
         ),
         title: Text("Profile",
             style: TextStyle(
@@ -95,8 +95,7 @@ class _ProfileState extends State<Profile> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 23),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(height: 20),
                         Center(
@@ -131,8 +130,7 @@ class _ProfileState extends State<Profile> {
                                       builder: (context) => EditProfile(),
                                     ),
                                   );
-
-                                  if(result == true) {
+                                  if (result == true) {
                                     getUserData();
                                   }
                                 },

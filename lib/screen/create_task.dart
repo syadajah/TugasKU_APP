@@ -84,14 +84,14 @@ class _CreateTaskState extends State<CreateTask> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    
+
     if (picked != null) {
       // Tampilkan dialog untuk memilih waktu
       final TimeOfDay? timePicked = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
-      
+
       if (timePicked != null) {
         // Gabungkan tanggal dan waktu
         final DateTime deadline = DateTime(
@@ -101,11 +101,12 @@ class _CreateTaskState extends State<CreateTask> {
           timePicked.hour,
           timePicked.minute,
         );
-        
+
         setState(() {
           selectedDeadline = deadline;
           // Format tanggal dan waktu untuk ditampilkan di TextField
-          deadlineController.text = DateFormat('dd-MM-yyyy HH:mm').format(deadline);
+          deadlineController.text =
+              DateFormat('dd-MM-yyyy HH:mm').format(deadline);
         });
       }
     }
@@ -267,7 +268,8 @@ class _CreateTaskState extends State<CreateTask> {
                   child: TextField(
                     onTap: _showDatePicker,
                     controller: deadlineController,
-                    readOnly: true, // Tambahkan readOnly agar tidak bisa edit manual
+                    readOnly:
+                        true, // Tambahkan readOnly agar tidak bisa edit manual
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color.fromARGB(225, 242, 242, 242),
@@ -323,19 +325,23 @@ class _CreateTaskState extends State<CreateTask> {
                         if (selectedCategoryId == null) {
                           // Tampilkan pesan error
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Pilih kategori terlebih dahulu')),
+                            SnackBar(
+                                content:
+                                    Text('Pilih kategori terlebih dahulu')),
                           );
                           return;
                         }
-                        
+
                         if (selectedDeadline == null) {
                           // Tampilkan pesan error
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Pilih tanggal deadline terlebih dahulu')),
+                            SnackBar(
+                                content: Text(
+                                    'Pilih tanggal deadline terlebih dahulu')),
                           );
                           return;
                         }
-                        
+
                         await taskService.createTask(
                           userId: userData!['id'],
                           name: nameController.text,
@@ -344,9 +350,11 @@ class _CreateTaskState extends State<CreateTask> {
                           category: selectedCategoryId!,
                         );
 
-                        await taskService.getTaskCountByCategory(selectedCategoryId!);
+                        await taskService
+                            .getTaskCountByCategory(selectedCategoryId!);
 
-                        Navigator.pop(context, true); // Kembalikan nilai true untuk trigger refresh
+                        Navigator.pop(context,
+                            true); // Kembalikan nilai true untuk trigger refresh
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(225, 5, 38, 89),

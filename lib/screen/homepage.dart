@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/Auth/auth_service.dart';
@@ -23,20 +24,43 @@ class _HomepageState extends State<Homepage> {
   Map<String, dynamic>? userData;
   String? name;
   String? email;
+  bool _isLoading = true;
+  File? _imageFile;
 
   //get task service
   final taskService = TaskCreate();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getUserData();
-    Map result = authService.getUserCurrentEmail();
-    name = result['name'];
-    email = result['email'];
+    // Inisialisasi data dengan satu fungsi
+    initializeData();
+  }
 
-    getAssignments();
+  Future<void> initializeData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await getUserData();
+
+      Map result = authService.getUserCurrentEmail();
+      name = result['name'];
+      email = result['email'];
+
+      if (userData != null) {
+        await getAssignmentsData();
+      }
+    } catch (e) {
+      debugPrint('Error initializing data: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -45,63 +69,82 @@ class _HomepageState extends State<Homepage> {
   }
 
   Future<void> getUserData() async {
-    final response = await authService.getCurrentUserData();
-    setState(() {
-      userData = response;
-    });
-  }
-
-List<Map<String, dynamic>> getUniqueCategories() {
-  if (assignments == null) return [];
-  
-  // Buat map untuk menyimpan kategori unik dan menghitung jumlah tugas
-  Map<int, Map<String, dynamic>> uniqueCategoriesMap = {};
-  
-  // Loop melalui assignments dan tambahkan kategori ke map
-  for (var assignment in assignments!) {
-    int categoryId = assignment['categories']['id'];
-    String categoryName = assignment['categories']['name'];
-    
-    // Penambahan jika kategori id belum ada di map
-    if (!uniqueCategoriesMap.containsKey(categoryId)) {
-      uniqueCategoriesMap[categoryId] = {
-        'id': categoryId,
-        'name': categoryName,
-        'task_count': "0", // Inisialisasi dengan 0
-        'count': 0, // Counter internal
-      };
+    try {
+      final response = await authService.getCurrentUserData();
+      if (mounted) {
+        setState(() {
+          userData = response;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting user data: $e');
     }
-    
-    // Tambahkan perhitungan untuk kategori
-    uniqueCategoriesMap[categoryId]?['count'] = uniqueCategoriesMap[categoryId]?['count'] + 1;
-    int count = uniqueCategoriesMap[categoryId]?['count'];
-    uniqueCategoriesMap[categoryId]?['task_count'] = "$count Tugas";
   }
-  
-  // Konversi map ke list
-  return uniqueCategoriesMap.values.toList();
-}
 
-  void getAssignments() async {
-    setState(() {
-      // Indicate loading state
-      assignments = null;
-    });
+  List<Map<String, dynamic>> getUniqueCategories() {
+    if (assignments == null || assignments!.isEmpty) return [];
 
-    await getUserData();
-    taskService.loadAssignments(userData!['id']).then((data) {
-      debugPrint('Data: $data');
-      setState(() {
-        assignments = data;
-      });
-    });
+    // Buat map untuk menyimpan kategori unik dan menghitung jumlah tugas
+    Map<int, Map<String, dynamic>> uniqueCategoriesMap = {};
+
+    // Loop melalui assignments dan tambahkan kategori ke map
+    for (var assignment in assignments!) {
+      // Periksa jika categories dan id ada
+      if (assignment['categories'] != null &&
+          assignment['categories']['id'] != null) {
+        int categoryId = assignment['categories']['id'];
+        String categoryName =
+            assignment['categories']['name'] ?? 'Tidak ada nama';
+
+        // Penambahan jika kategori id belum ada di map
+        if (!uniqueCategoriesMap.containsKey(categoryId)) {
+          uniqueCategoriesMap[categoryId] = {
+            'id': categoryId,
+            'name': categoryName,
+            'task_count': "0",
+            'count': 0,
+          };
+        }
+
+        // Tambahkan perhitungan untuk kategori
+        uniqueCategoriesMap[categoryId]?['count'] =
+            uniqueCategoriesMap[categoryId]?['count'] + 1;
+        int count = uniqueCategoriesMap[categoryId]?['count'];
+        uniqueCategoriesMap[categoryId]?['task_count'] = "$count Tugas";
+      }
+    }
+
+    // Konversi map ke list
+    return uniqueCategoriesMap.values.toList();
+  }
+
+  Future<void> getAssignmentsData() async {
+    try {
+      final data = await taskService.loadAssignments(userData!['id']);
+      if (mounted) {
+        setState(() {
+          assignments = data;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading assignments: $e');
+      if (mounted) {
+        setState(() {
+          assignments = [];
+        });
+      }
+    }
+  }
+
+  Future<void> refreshData() async {
+    await initializeData();
   }
 
   @override
   Widget build(BuildContext context) {
-
+    // Get unique categories
     final uniqueCategories = getUniqueCategories();
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -116,11 +159,14 @@ List<Map<String, dynamic>> getUniqueCategories() {
                   Row(
                     children: [
                       IconButton(
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => Profile()));
+                          if (result == true) {
+                            refreshData();
+                          }
                         },
                         icon: const HeroIcon(
                           HeroIcons.userCircle,
@@ -229,38 +275,55 @@ List<Map<String, dynamic>> getUniqueCategories() {
                           const SizedBox(
                             height: 20,
                           ),
-                          uniqueCategories.isNotEmpty
+                          _imageFile != null && _isLoading
                               ? SizedBox(
                                   height: 135,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: ListView.separated(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 5, vertical: 5),
-                                    scrollDirection: Axis.horizontal,
-                                    itemBuilder: (context, index) {
-                                      // Pastikan nilai categoryId dari assignments
-                                      int categoryId = uniqueCategories[index]['id'];
-
-                                      return CategoryCard(
-                                        category: uniqueCategories[index]['name']
-                                            .toString(),
-                                        taskCount: uniqueCategories[index]['task_count']
-                                            .toString(),
-                                        categoryId: categoryId,
-                                      );
-                                    },
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(width: 10),
-                                    shrinkWrap: true,
-                                    itemCount: uniqueCategories.length,
-                                  ),
-                                )
-                              : Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
+                                  child: Center(
                                     child: CircularProgressIndicator(),
                                   ),
-                                ),
+                                )
+                              : uniqueCategories.isNotEmpty
+                                  ? SizedBox(
+                                      height: 135,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: ListView.separated(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 5, vertical: 5),
+                                        scrollDirection: Axis.horizontal,
+                                        itemBuilder: (context, index) {
+                                          // Pastikan nilai categoryId dari assignments
+                                          int categoryId =
+                                              uniqueCategories[index]['id'];
+
+                                          return CategoryCard(
+                                            category: uniqueCategories[index]
+                                                    ['name']
+                                                .toString(),
+                                            taskCount: uniqueCategories[index]
+                                                    ['task_count']
+                                                .toString(),
+                                            categoryId: categoryId,
+                                          );
+                                        },
+                                        separatorBuilder: (context, index) =>
+                                            const SizedBox(width: 10),
+                                        shrinkWrap: true,
+                                        itemCount: uniqueCategories.length,
+                                      ),
+                                    )
+                                  : SizedBox(
+                                      height: 135,
+                                      child: Center(
+                                        child: Text(
+                                          "Belum ada kategori",
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 12,
+                                            color: Color(0xff4d4d4d),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                           const SizedBox(height: 40),
                           const Text(
                             "Tugas yang sedang dikerjakan",
@@ -274,40 +337,56 @@ List<Map<String, dynamic>> getUniqueCategories() {
                           SizedBox(
                             height: 20,
                           ),
-                          assignments != null
+                          _isLoading
                               ? Expanded(
-                                  child: ListView.separated(
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(
-                                      height: 10,
-                                    ),
-                                    shrinkWrap: true,
-                                    itemCount: assignments!.length,
-                                    itemBuilder: (context, index) {
-                                      return TaskCard(
-                                        category: assignments![index]
-                                                ['categories']['name']
-                                            .toString(),
-                                        name: assignments![index]['name']
-                                            .toString(),
-                                        description: assignments![index]
-                                                ['description']
-                                            .toString(),
-                                        deadline: assignments![index]
-                                                ['deadline']
-                                            .toString(),
-                                        taskId: assignments![index]['id'].toString(),
-                                            
-                                      );
-                                    },
-                                  ),
-                                )
-                              : Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
+                                  child: Center(
                                     child: CircularProgressIndicator(),
                                   ),
                                 )
+                              : assignments != null && assignments!.isNotEmpty
+                                  ? Expanded(
+                                      child: ListView.separated(
+                                        separatorBuilder: (context, index) =>
+                                            const SizedBox(
+                                          height: 10,
+                                        ),
+                                        shrinkWrap: true,
+                                        itemCount: assignments!.length,
+                                        itemBuilder: (context, index) {
+                                          return TaskCard(
+                                            taskId: assignments![index]['id']
+                                                .toString(),
+                                            category: assignments![index]
+                                                        ['categories'] !=
+                                                    null
+                                                ? assignments![index]
+                                                        ['categories']['name']
+                                                    .toString()
+                                                : "Tidak ada kategori",
+                                            name: assignments![index]['name']
+                                                .toString(),
+                                            description: assignments![index]
+                                                    ['description']
+                                                .toString(),
+                                            deadline: assignments![index]
+                                                    ['deadline']
+                                                .toString(),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Expanded(
+                                      child: Center(
+                                        child: Text(
+                                          "Belum ada tugas",
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 12,
+                                            color: Color(0xff4d4d4d),
+                                          ),
+                                        ),
+                                      ),
+                                    )
                         ],
                       ),
                     ),
@@ -325,7 +404,7 @@ List<Map<String, dynamic>> getUniqueCategories() {
             MaterialPageRoute(builder: (context) => CreateTask()),
           );
           if (result == true) {
-            getAssignments(); // Refresh data setelah kembali dari CreateTask
+            refreshData();
           }
         },
         icon: const HeroIcon(
