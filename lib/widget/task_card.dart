@@ -9,26 +9,27 @@ class TaskCard extends StatelessWidget {
   final String description;
   final String deadline;
   final String taskId;
+  final String categoryId;
+  final VoidCallback onUpdate;
 
   final TaskCreate _taskService = TaskCreate();
 
-  TaskCard(
-      {super.key,
-      required this.category,
-      required this.name,
-      required this.description,
-      required this.deadline,
-      required this.taskId});
+  TaskCard({
+    super.key,
+    required this.category,
+    required this.name,
+    required this.description,
+    required this.deadline,
+    required this.taskId,
+    required this.categoryId,
+    required this.onUpdate,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Parse deadline dari string ke DateTime
     DateTime deadlineDate = DateTime.parse(deadline);
-
-    // Hitung sisa waktu
     String remainingTime = _taskService.formatDuration(deadlineDate);
 
-    // Tentukan warna berdasarkan sisa waktu
     Color timeColor = Color(0xff052659);
     Color bgTimeColor = Color(0x20052659);
     if (deadlineDate.difference(DateTime.now()).inDays < 2) {
@@ -39,19 +40,21 @@ class TaskCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DetailTugas(
-                      taskId: taskId,
-                      name: name,
-                      category: category,
-                      description: description,
-                      deadline: deadline,
-                    
-                    ))).then((result) {
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailTugas(
+              taskId: taskId,
+              name: name,
+              category: category,
+              description: description,
+              deadline: deadline,
+              categoryId: categoryId,
+              imageUrl: null,
+            ),
+          ),
+        ).then((result) {
           if (result == true) {
-            // Make sure parent screen gets refreshed
-            Navigator.pop(context, true);
+            onUpdate();
           }
         });
       },
@@ -118,7 +121,7 @@ class TaskCard extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          remainingTime, // Tampilkan sisa waktu
+                          remainingTime,
                           style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 12,
@@ -145,10 +148,11 @@ class TaskCard extends StatelessWidget {
               Text(
                 description,
                 style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontSize: 12,
-                    color: Color(0xff4D4D4D),
-                    fontWeight: FontWeight.w500),
+                  fontFamily: "Poppins",
+                  fontSize: 12,
+                  color: Color(0xff4D4D4D),
+                  fontWeight: FontWeight.w500,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

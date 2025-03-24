@@ -1,15 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-//status enum
+// Status enum
 enum TaskStatus {
   uncompleted,
   completed,
 }
 
-//extension konversi antara string dan enum
+// Extension konversi antara string dan enum
 extension TaskStatusExtension on TaskStatus {
   String toShortString() {
     return toString().split('.').last;
@@ -23,18 +24,53 @@ extension TaskStatusExtension on TaskStatus {
 
 class TaskCreate {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-  Future<void> createTask(
-      {required String userId,
-      required String name,
-      required String description,
-      required String deadline,
-      required int category,
-      String? image}) async {
+  // Inisialisasi notifikasi lokal
+  Future<void> initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Tampilkan notifikasi langsung
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    await _flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'channel_id',
+          'channel_name',
+          channelDescription: 'channel_description',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  }
+
+  Future<void> createTask({
+    required String userId,
+    required String name,
+    required String description,
+    required String deadline,
+    required int category,
+    String? image,
+  }) async {
     try {
       // Ubah string deadline menjadi DateTime
       DateTime deadlineDate = DateTime.parse(deadline);
 
+      // Simpan tugas ke database
       await _supabase.from('assignment').insert([
         {
           "name": name,
@@ -43,7 +79,8 @@ class TaskCreate {
           "category_id": category,
           "user_id": userId,
           "status": TaskStatus.uncompleted.toShortString(),
-          "image": image
+          "image": image,
+          "is_notified": false,
         }
       ]);
     } catch (e) {
@@ -75,19 +112,39 @@ class TaskCreate {
     try {
       final response = await _supabase
           .from('assignment')
-          .select('*, categories(name, id)') // Tetap sama
+          .select('*, categories(name, id)')
           .eq('user_id', userId)
           .eq('status', TaskStatus.uncompleted.toShortString())
           .order('created_at', ascending: false);
 
       DateTime now = DateTime.now();
 
-      //Filter tugas yang unexpired
+      // Filter tugas yang belum kadaluarsa
       List<Map<String, dynamic>> activeTasks =
           response.map<Map<String, dynamic>>((row) => row).where((task) {
         DateTime deadline = DateTime.parse(task['deadline']);
-        return deadline.isAfter(now); //menampilkan tugas yang unexpired
+        return deadline.isAfter(now);
       }).toList();
+
+      // Periksa tugas yang mendekati deadline dan tampilkan notifikasi
+      for (var task in activeTasks) {
+        DateTime deadline = DateTime.parse(task['deadline']);
+        final difference = deadline.difference(now).inHours;
+
+        if (difference <= 24 &&
+            difference > 0 &&
+            !(task['is_notified'] ?? false)) {
+          await showNotification(
+            id: task['id'].hashCode,
+            title: 'Peringatan Tugas!',
+            body:
+                'Tugas "${task['name']}" di kategori "${task['categories']['name']}" akan jatuh tempo besok!',
+          );
+
+          // Update status notifikasi di database
+          await updateTaskNotificationStatus(task['id'], true);
+        }
+      }
 
       return activeTasks;
     } catch (error) {
@@ -96,24 +153,19 @@ class TaskCreate {
     }
   }
 
-  // Methods that need changes in task_service.dart
-
   Future<String?> uploadTaskImage(File imageFile, String taskId) async {
     try {
       final String fileName =
           'task_${taskId}_${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
       final String storagePath = 'uploads/$fileName';
 
-      // Upload file ke Supabase Storage
       final response =
           await _supabase.storage.from('image').upload(storagePath, imageFile);
       debugPrint("Upload response: $response");
 
-      // Dapatkan URL publik untuk gambar
       final String imageUrl =
           _supabase.storage.from('image').getPublicUrl(storagePath);
 
-      // CHANGED: Parse taskId to int before using it to update the record
       await _supabase
           .from('assignment')
           .update({'image': imageUrl}).eq('id', int.parse(taskId));
@@ -125,10 +177,8 @@ class TaskCreate {
     }
   }
 
-  // Method untuk hapus gambar tugas
   Future<bool> deleteTaskImage(String taskId) async {
     try {
-      // Dapatkan data tugas termasuk URL gambar
       final response = await _supabase
           .from('assignment')
           .select('image')
@@ -138,14 +188,11 @@ class TaskCreate {
       final String? imageUrl = response['image'];
 
       if (imageUrl != null) {
-        // Extract path dari URL
         final Uri uri = Uri.parse(imageUrl);
         final String imagePath = uri.pathSegments.sublist(2).join('/');
 
-        // Hapus file dari storage
         await _supabase.storage.from('image').remove([imagePath]);
 
-        // Update task dengan null image
         await _supabase
             .from('assignment')
             .update({'image': null}).eq('id', int.parse(taskId));
@@ -160,13 +207,12 @@ class TaskCreate {
     }
   }
 
-  //Task completed
   Future<bool> completeTask(int taskId) async {
     try {
       DateTime now = DateTime.now();
       await _supabase.from('assignment').update({
         'status': TaskStatus.completed.toShortString(),
-        'completed_at': now.toIso8601String()
+        'completed_at': now.toIso8601String(),
       }).eq('id', taskId);
       return true;
     } catch (e) {
@@ -175,7 +221,22 @@ class TaskCreate {
     }
   }
 
-  //Load tugas yang sudah selesai/expired
+  Future<List<Map<String, dynamic>>> loadCompletedTasks(String userId) async {
+    try {
+      final response = await _supabase
+          .from('assignment')
+          .select('*, categories(*)')
+          .eq('user_id', userId)
+          .not('completed_at', 'is', null)
+          .order('created_at', ascending: false);
+
+      return response;
+    } catch (e) {
+      debugPrint('Error loading completed tasks: $e');
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> loadHistoryTasks(String userId) async {
     try {
       final response = await _supabase
@@ -186,7 +247,6 @@ class TaskCreate {
 
       DateTime now = DateTime.now();
 
-      //filter menampilkan tugas yang sudah selesai/expired
       List<Map<String, dynamic>> historyTask =
           response.map<Map<String, dynamic>>((row) => row).where((task) {
         DateTime deadline = DateTime.parse(task['deadline']);
@@ -212,20 +272,16 @@ class TaskCreate {
         task['status'] == TaskStatus.uncompleted.toShortString();
   }
 
-  // Menghitung jumlah tugas per kategori
   Map<String, int> countTaskByCategory(List<Map<String, dynamic>> tasks) {
     Map<String, int> result = {};
 
     for (var task in tasks) {
-      // Pastikan task memiliki data categories
       if (task['categories'] != null) {
         String categoryName = task['categories']['name'];
 
-        // Jika kategori sudah ada di map, tambahkan count
         if (result.containsKey(categoryName)) {
           result[categoryName] = result[categoryName]! + 1;
         } else {
-          // Jika kategori belum ada, inisialisasi dengan 1
           result[categoryName] = 1;
         }
       }
@@ -265,23 +321,30 @@ class TaskCreate {
   Future<void> updateTask(int id, String name, String description,
       String deadline, String category) async {
     try {
-      // Ubah string deadline menjadi DateTime
       DateTime deadlineDate = DateTime.parse(deadline);
-
       int categoryId = int.parse(category);
 
       await _supabase.from('assignment').update({
         "name": name,
         "description": description,
         "deadline": deadlineDate.toIso8601String(),
-        "category_id": categoryId
+        "category_id": categoryId,
       }).eq('id', id);
     } catch (e) {
       debugPrint("Error saat memperbarui tugas: $e");
     }
   }
 
-  // Menghitung jumlah tugas berdasarkan kategori tertentu
+  Future<void> updateTaskNotificationStatus(int id, bool isNotified) async {
+    try {
+      await _supabase
+          .from('assignment')
+          .update({'is_notified': isNotified}).eq('id', id);
+    } catch (e) {
+      debugPrint("Error saat memperbarui status notifikasi: $e");
+    }
+  }
+
   Future<String> getTaskCountByCategory(int categoryId) async {
     try {
       DateTime now = DateTime.now();
@@ -313,7 +376,6 @@ class TaskCreate {
     }
   }
 
-  // Format durasi/deadline
   String formatDuration(DateTime deadline) {
     DateTime now = DateTime.now();
     Duration remainingTime = deadline.difference(now);
@@ -323,7 +385,7 @@ class TaskCreate {
     int minutes = remainingTime.inMinutes % 60;
 
     if (days > 0) {
-      return '$days' 'D';
+      return '$days D';
     } else if (hours > 0) {
       return '$hours jam $minutes menit';
     } else {

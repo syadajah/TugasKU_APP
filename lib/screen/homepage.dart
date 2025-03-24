@@ -17,24 +17,22 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  //get auth service
   final authService = AuthService();
-
+  final taskService = TaskCreate();
   List<Map<String, dynamic>>? assignments;
+  List<Map<String, dynamic>>? filteredAssignments;
   Map<String, dynamic>? userData;
   String? name;
   String? email;
   bool _isLoading = true;
   File? _imageFile;
-
-  //get task service
-  final taskService = TaskCreate();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi data dengan satu fungsi
     initializeData();
+    _searchController.addListener(_filterTasks);
   }
 
   Future<void> initializeData() async {
@@ -63,11 +61,6 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> getUserData() async {
     try {
       final response = await authService.getCurrentUserData();
@@ -82,21 +75,17 @@ class _HomepageState extends State<Homepage> {
   }
 
   List<Map<String, dynamic>> getUniqueCategories() {
-    if (assignments == null || assignments!.isEmpty) return [];
+    if (filteredAssignments == null || filteredAssignments!.isEmpty) return [];
 
-    // Buat map untuk menyimpan kategori unik dan menghitung jumlah tugas
     Map<int, Map<String, dynamic>> uniqueCategoriesMap = {};
 
-    // Loop melalui assignments dan tambahkan kategori ke map
-    for (var assignment in assignments!) {
-      // Periksa jika categories dan id ada
+    for (var assignment in filteredAssignments!) {
       if (assignment['categories'] != null &&
           assignment['categories']['id'] != null) {
         int categoryId = assignment['categories']['id'];
         String categoryName =
             assignment['categories']['name'] ?? 'Tidak ada nama';
 
-        // Penambahan jika kategori id belum ada di map
         if (!uniqueCategoriesMap.containsKey(categoryId)) {
           uniqueCategoriesMap[categoryId] = {
             'id': categoryId,
@@ -106,7 +95,6 @@ class _HomepageState extends State<Homepage> {
           };
         }
 
-        // Tambahkan perhitungan untuk kategori
         uniqueCategoriesMap[categoryId]?['count'] =
             uniqueCategoriesMap[categoryId]?['count'] + 1;
         int count = uniqueCategoriesMap[categoryId]?['count'];
@@ -114,7 +102,6 @@ class _HomepageState extends State<Homepage> {
       }
     }
 
-    // Konversi map ke list
     return uniqueCategoriesMap.values.toList();
   }
 
@@ -124,6 +111,7 @@ class _HomepageState extends State<Homepage> {
       if (mounted) {
         setState(() {
           assignments = data;
+          filteredAssignments = data;
         });
       }
     } catch (e) {
@@ -131,6 +119,7 @@ class _HomepageState extends State<Homepage> {
       if (mounted) {
         setState(() {
           assignments = [];
+          filteredAssignments = [];
         });
       }
     }
@@ -138,11 +127,36 @@ class _HomepageState extends State<Homepage> {
 
   Future<void> refreshData() async {
     await initializeData();
+    _filterTasks();
+  }
+
+  void _filterTasks() {
+    final query = _searchController.text.toLowerCase();
+    if (assignments == null) return;
+
+    setState(() {
+      if (query.isEmpty) {
+        filteredAssignments = assignments;
+      } else {
+        filteredAssignments = assignments!.where((task) {
+          final taskName = task['name']?.toString().toLowerCase() ?? '';
+          final taskCategory = task['categories'] != null
+              ? task['categories']['name']?.toString().toLowerCase() ?? ''
+              : '';
+          return taskName.contains(query) || taskCategory.contains(query);
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get unique categories
     final uniqueCategories = getUniqueCategories();
 
     return Scaffold(
@@ -161,9 +175,9 @@ class _HomepageState extends State<Homepage> {
                       IconButton(
                         onPressed: () async {
                           final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Profile()));
+                            context,
+                            MaterialPageRoute(builder: (context) => Profile()),
+                          );
                           if (result == true) {
                             refreshData();
                           }
@@ -241,6 +255,7 @@ class _HomepageState extends State<Homepage> {
                             width: MediaQuery.of(context).size.width,
                             height: 40,
                             child: TextField(
+                              controller: _searchController,
                               decoration: InputDecoration(
                                 fillColor: const Color(0xffF2F2F2),
                                 border: OutlineInputBorder(
@@ -252,7 +267,7 @@ class _HomepageState extends State<Homepage> {
                                   Icons.search,
                                   color: Color(0xff808080),
                                 ),
-                                hintText: "Search...",
+                                hintText: "Search by name or category...",
                                 hintStyle: const TextStyle(
                                   color: Color(0xff808080),
                                   fontSize: 12,
@@ -272,9 +287,7 @@ class _HomepageState extends State<Homepage> {
                               color: Color(0xff4d4d4d),
                             ),
                           ),
-                          const SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
                           _imageFile != null && _isLoading
                               ? SizedBox(
                                   height: 135,
@@ -291,10 +304,8 @@ class _HomepageState extends State<Homepage> {
                                             horizontal: 5, vertical: 5),
                                         scrollDirection: Axis.horizontal,
                                         itemBuilder: (context, index) {
-                                          // Pastikan nilai categoryId dari assignments
                                           int categoryId =
                                               uniqueCategories[index]['id'];
-
                                           return CategoryCard(
                                             category: uniqueCategories[index]
                                                     ['name']
@@ -334,43 +345,52 @@ class _HomepageState extends State<Homepage> {
                               color: Color(0xff4d4d4d),
                             ),
                           ),
-                          SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
                           _isLoading
                               ? Expanded(
                                   child: Center(
                                     child: CircularProgressIndicator(),
                                   ),
                                 )
-                              : assignments != null && assignments!.isNotEmpty
+                              : filteredAssignments != null &&
+                                      filteredAssignments!.isNotEmpty
                                   ? Expanded(
                                       child: ListView.separated(
                                         separatorBuilder: (context, index) =>
-                                            const SizedBox(
-                                          height: 10,
-                                        ),
+                                            const SizedBox(height: 10),
                                         shrinkWrap: true,
-                                        itemCount: assignments!.length,
+                                        itemCount: filteredAssignments!.length,
                                         itemBuilder: (context, index) {
                                           return TaskCard(
-                                            taskId: assignments![index]['id']
+                                            taskId: filteredAssignments![index]
+                                                    ['id']
                                                 .toString(),
-                                            category: assignments![index]
+                                            category: filteredAssignments![index]
                                                         ['categories'] !=
                                                     null
-                                                ? assignments![index]
+                                                ? filteredAssignments![index]
                                                         ['categories']['name']
                                                     .toString()
                                                 : "Tidak ada kategori",
-                                            name: assignments![index]['name']
+                                            categoryId: filteredAssignments![index]
+                                                        ['categories'] !=
+                                                    null
+                                                ? filteredAssignments![index]
+                                                        ['categories']['id']
+                                                    .toString()
+                                                : "",
+                                            name: filteredAssignments![index]
+                                                    ['name']
                                                 .toString(),
-                                            description: assignments![index]
-                                                    ['description']
-                                                .toString(),
-                                            deadline: assignments![index]
-                                                    ['deadline']
-                                                .toString(),
+                                            description:
+                                                filteredAssignments![index]
+                                                        ['description']
+                                                    .toString(),
+                                            deadline:
+                                                filteredAssignments![index]
+                                                        ['deadline']
+                                                    .toString(),
+                                            onUpdate: refreshData,
                                           );
                                         },
                                       ),
@@ -378,7 +398,7 @@ class _HomepageState extends State<Homepage> {
                                   : Expanded(
                                       child: Center(
                                         child: Text(
-                                          "Belum ada tugas",
+                                          "Belum ada tugas yang cocok",
                                           style: TextStyle(
                                             fontFamily: "Poppins",
                                             fontSize: 12,
@@ -386,7 +406,7 @@ class _HomepageState extends State<Homepage> {
                                           ),
                                         ),
                                       ),
-                                    )
+                                    ),
                         ],
                       ),
                     ),
@@ -416,9 +436,12 @@ class _HomepageState extends State<Homepage> {
         label: const Text(
           "Tambah Tugas",
           style: TextStyle(
-              fontSize: 12, color: Color(0xffffffff), fontFamily: "Poppins"),
+            fontSize: 12,
+            color: Color(0xffffffff),
+            fontFamily: "Poppins",
+          ),
         ),
-        backgroundColor: Color(0xff052659), // Warna FAB
+        backgroundColor: Color(0xff052659),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

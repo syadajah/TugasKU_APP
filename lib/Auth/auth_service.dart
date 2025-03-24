@@ -23,7 +23,7 @@ class AuthService {
     await _supabase.auth.signOut();
   }
 
-  //Get user email
+  // Get user email
   Map getUserCurrentEmail() {
     final session = _supabase.auth.currentSession;
     final user = session?.user;
