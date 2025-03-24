@@ -136,9 +136,9 @@ class TaskCreate {
             !(task['is_notified'] ?? false)) {
           await showNotification(
             id: task['id'].hashCode,
-            title: 'Peringatan Tugas!',
+            title: 'Ingat Tugas! ⏱️',
             body:
-                'Tugas "${task['name']}" di kategori "${task['categories']['name']}" akan jatuh tempo besok!',
+                'Tugas "${task['name']}" di kategori "${task['categories']['name']}" Dikumpulin besok lohh🚀!',
           );
 
           // Update status notifikasi di database
