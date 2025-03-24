@@ -123,6 +123,7 @@ class _HistoryState extends State<History> {
                                 taskId: task['id'],
                                 imageUrl: task[
                                     'image'], // Add this line to pass the image URL
+                                status: task['status'],
                               ),
                             ),
                           );

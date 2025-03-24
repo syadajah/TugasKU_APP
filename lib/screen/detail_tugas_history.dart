@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tugasku/service/task_service.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class DetailTugasHistory extends StatefulWidget {
@@ -11,6 +10,7 @@ class DetailTugasHistory extends StatefulWidget {
   final String deadline;
   final int taskId;
   final String? imageUrl;
+  final String status;
 
   final TaskCreate _taskService = TaskCreate();
   DetailTugasHistory({
@@ -21,6 +21,7 @@ class DetailTugasHistory extends StatefulWidget {
     required this.deadline,
     required this.taskId,
     this.imageUrl,
+    required this.status,
   });
 
   @override
@@ -28,10 +29,11 @@ class DetailTugasHistory extends StatefulWidget {
 }
 
 class _DetailTugasHistoryState extends State<DetailTugasHistory> {
-  bool _isLoading = false;
+  final bool _isLoading = false;
   File? _imageFile;
   String? _imageUrl;
-  final ImagePicker _picker = ImagePicker();
+
+  List<Map<String, dynamic>>? completedTasks;
 
   @override
   void initState() {
@@ -39,59 +41,13 @@ class _DetailTugasHistoryState extends State<DetailTugasHistory> {
     _imageUrl = widget.imageUrl;
   }
 
-  Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-        _imageUrl = null;
-      });
-
-      _uploadImage();
-    }
-  }
-
-  Future<void> _uploadImage() async {
-    if (_imageFile == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // CHANGED: Convert taskId to string for the file name in uploadTaskImage
-      final newImageUrl = await widget._taskService
-          .uploadTaskImage(_imageFile!, widget.taskId.toString());
-
-      if (newImageUrl != null) {
-        setState(() {
-          _imageUrl = newImageUrl;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Gagal mengupload gambar: $e")));
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    DateTime deadlineDate = DateTime.parse(widget.deadline);
+    bool isCompleted = widget.status == 'completed';
 
-    String remainingTime = widget._taskService.formatDuration(deadlineDate);
-
-    Color timeColor = Color(0xff052659);
-    Color bgTimeColor = Color(0x20052659);
-    if (deadlineDate.difference(DateTime.now()).inDays < 2) {
-      timeColor = Color(0xff991B1B);
-      bgTimeColor = Color(0x20991B1B);
-    }
+    String statusText = isCompleted ? "Selesai" : "Tidak Selesai";
+    Color timeColor = isCompleted ? Color(0xff15803D) : Color(0xffB91C1C);
+    Color bgTimeColor = isCompleted ? Color(0x2027AE60) : Color(0x20EB5757);
 
     return Scaffold(
       appBar: AppBar(
@@ -153,7 +109,7 @@ class _DetailTugasHistoryState extends State<DetailTugasHistory> {
                               ColorFilter.mode(timeColor, BlendMode.srcIn),
                         ),
                         SizedBox(width: 4),
-                        Text(remainingTime,
+                        Text(statusText,
                             style: TextStyle(
                                 color: timeColor,
                                 fontFamily: "Poppins",

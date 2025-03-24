@@ -201,7 +201,7 @@ class _DetailTugasState extends State<DetailTugas> {
                 onTap: _pickImage,
                 child: Container(
                   width: double.infinity,
-                  height: 350, // Tambahkan tinggi untuk menampilkan gambar
+                  height: 300, // Tambahkan tinggi untuk menampilkan gambar
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey.shade400),
