@@ -119,7 +119,7 @@ class TaskCreate {
 
       DateTime now = DateTime.now();
 
-      // Filter tugas yang belum kadaluarsa
+      // Filter tugas yang belum Expired
       List<Map<String, dynamic>> activeTasks =
           response.map<Map<String, dynamic>>((row) => row).where((task) {
         DateTime deadline = DateTime.parse(task['deadline']);
@@ -138,7 +138,7 @@ class TaskCreate {
             id: task['id'].hashCode,
             title: 'Ingat Tugas! ⏱️',
             body:
-                'Tugas "${task['name']}" di kategori "${task['categories']['name']}" Dikumpulin besok lohh🚀!',
+                'Deadline Tugas "${task['name']}" di kategori "${task['categories']['name']}" Akan terlewat besok!',
           );
 
           // Update status notifikasi di database
@@ -148,7 +148,7 @@ class TaskCreate {
 
       return activeTasks;
     } catch (error) {
-      debugPrint("Error loading assignments: $error");
+      debugPrint("Error Memuat gambar: $error");
       return [];
     }
   }
@@ -172,7 +172,7 @@ class TaskCreate {
 
       return imageUrl;
     } catch (e) {
-      debugPrint("Error uploading task image: $e");
+      debugPrint("Error Mengunggah gambar: $e");
       return null;
     }
   }
@@ -202,7 +202,7 @@ class TaskCreate {
 
       return false;
     } catch (e) {
-      debugPrint("Error deleting task image: $e");
+      debugPrint("Error Menghapus gambar: $e");
       return false;
     }
   }
@@ -216,7 +216,7 @@ class TaskCreate {
       }).eq('id', taskId);
       return true;
     } catch (e) {
-      debugPrint("Error completed assignment: $e");
+      debugPrint("Error dalam menyelesaikan tugas: $e");
       return false;
     }
   }
@@ -232,7 +232,7 @@ class TaskCreate {
 
       return response;
     } catch (e) {
-      debugPrint('Error loading completed tasks: $e');
+      debugPrint('Error memuat tugas yang selesai: $e');
       return [];
     }
   }
@@ -260,7 +260,7 @@ class TaskCreate {
 
       return historyTask;
     } catch (error) {
-      debugPrint("Error Load history task $error");
+      debugPrint("Error Memuat Riwayat Tugas $error");
       return [];
     }
   }
@@ -313,7 +313,7 @@ class TaskCreate {
         return {'id': response['id'], 'name': response['name']};
       }
     } catch (error) {
-      debugPrint("Error adding category: $error");
+      debugPrint("Error Ketika menambahkan kategori : $error");
     }
     return null;
   }

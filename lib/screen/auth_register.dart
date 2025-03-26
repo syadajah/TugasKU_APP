@@ -31,7 +31,7 @@ class _AuthRegisterState extends State<AuthRegister> {
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Password Doesn't Match!"),
+          content: Text("Kata sandi tidak cocok!"),
         ),
       );
       return;

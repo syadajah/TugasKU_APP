@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:tugasku/Auth/auth_service.dart';
@@ -26,7 +25,6 @@ class _HomepageState extends State<Homepage> {
   String? name;
   String? email;
   bool _isLoading = true;
-  File? _imageFile;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -126,8 +124,9 @@ class _HomepageState extends State<Homepage> {
       if (mounted) {
         setState(() {
           assignments = data;
-          filteredAssignments = data;
+          filteredAssignments = List.from(data);
         });
+        _filterTasks(); // Tambahkan ini
       }
     } catch (e) {
       debugPrint('Error loading assignments: $e');
@@ -148,18 +147,21 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _filterTasks() {
-    final query = _searchController.text.toLowerCase();
     if (assignments == null) return;
+
+    final query = _searchController.text.toLowerCase().trim();
+    debugPrint("Filtering with query: $query");
 
     setState(() {
       if (query.isEmpty) {
-        filteredAssignments = assignments;
+        filteredAssignments = List.from(assignments!);
       } else {
         filteredAssignments = assignments!.where((task) {
           final taskName = task['name']?.toString().toLowerCase() ?? '';
           return taskName.contains(query);
         }).toList();
       }
+      debugPrint("Filtered Tasks Count: ${filteredAssignments?.length}");
     });
   }
 
@@ -284,7 +286,7 @@ class _HomepageState extends State<Homepage> {
                                     Icons.search,
                                     color: Color(0xff808080),
                                   ),
-                                  hintText: "Search by name or category...",
+                                  hintText: "Search...",
                                   hintStyle: const TextStyle(
                                     color: Color(0xff808080),
                                     fontSize: 12,
@@ -370,7 +372,7 @@ class _HomepageState extends State<Homepage> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   )
-                                : filteredAssignments != null &&
+                                : filteredAssignments != null ||
                                         filteredAssignments!.isNotEmpty
                                     ? Expanded(
                                         child: ListView.separated(
@@ -420,7 +422,7 @@ class _HomepageState extends State<Homepage> {
                                     : Expanded(
                                         child: Center(
                                           child: Text(
-                                            "Belum ada tugas yang cocok",
+                                            "Belum ada tugas yang ditambahkan",
                                             style: TextStyle(
                                               fontFamily: "Poppins",
                                               fontSize: 12,

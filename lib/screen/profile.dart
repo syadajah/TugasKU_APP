@@ -48,7 +48,7 @@ class _ProfileState extends State<Profile> {
       calculateStatistics();
     } else {
       setState(() {
-        _errorMessage = 'Gagal memuat data pengguna. Silakan coba lagi.';
+        _errorMessage = 'Gagal memuat data pengguna. Silakan coba lagi!';
       });
     }
 
@@ -87,12 +87,14 @@ class _ProfileState extends State<Profile> {
       String userId = userData!['id'].toString();
       debugPrint('Mengambil tugas untuk userId: $userId');
 
-      final List<Map<String, dynamic>> ongoing = await taskService.loadAssignments(userId);
+      final List<Map<String, dynamic>> ongoing =
+          await taskService.loadAssignments(userId);
       debugPrint('Tugas sedang dikerjakan: $ongoing');
 
-      final List<Map<String, dynamic>> completed = await taskService.loadCompletedTasks(userId);
+      final List<Map<String, dynamic>> completed =
+          await taskService.loadCompletedTasks(userId);
       debugPrint('Tugas selesai: $completed');
-      
+
       if (mounted) {
         setState(() {
           ongoingTasks = ongoing;
@@ -116,7 +118,8 @@ class _ProfileState extends State<Profile> {
       setState(() {
         ongoingTasksCount = ongoingTasks?.length ?? 0;
         completedTasksCount = completedTasks?.length ?? 0;
-        debugPrint('Statistik dihitung - Ongoing: $ongoingTasksCount, Completed: $completedTasksCount');
+        debugPrint(
+            'Statistik dihitung - Belum tuntas: $ongoingTasksCount, Tuntas : $completedTasksCount');
       });
     }
   }
@@ -130,9 +133,10 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    final double completionPercentage = (ongoingTasksCount + completedTasksCount) > 0
-        ? completedTasksCount / (ongoingTasksCount + completedTasksCount)
-        : 0.0;
+    final double completionPercentage =
+        (ongoingTasksCount + completedTasksCount) > 0
+            ? completedTasksCount / (ongoingTasksCount + completedTasksCount)
+            : 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -146,7 +150,7 @@ class _ProfileState extends State<Profile> {
           },
         ),
         title: const Text(
-          "Profile",
+          "Profil",
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontFamily: "Poppins",
@@ -237,7 +241,8 @@ class _ProfileState extends State<Profile> {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(225, 5, 38, 89),
+                                  backgroundColor:
+                                      const Color.fromARGB(225, 5, 38, 89),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
@@ -293,40 +298,49 @@ class _ProfileState extends State<Profile> {
                                     : Column(
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Column(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    completedTasksCount.toString(),
+                                                    completedTasksCount
+                                                        .toString(),
                                                     style: const TextStyle(
                                                       fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontFamily: "Poppins",
                                                     ),
                                                   ),
                                                   const Text(
                                                     "Tuntas",
-                                                    style: TextStyle(fontFamily: "Poppins"),
+                                                    style: TextStyle(
+                                                        fontFamily: "Poppins"),
                                                   ),
                                                 ],
                                               ),
                                               const SizedBox(width: 40),
                                               Column(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    ongoingTasksCount.toString(),
+                                                    ongoingTasksCount
+                                                        .toString(),
                                                     style: const TextStyle(
                                                       fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       fontFamily: "Poppins",
                                                     ),
                                                   ),
                                                   const Text(
                                                     "Belum Tuntas",
-                                                    style: TextStyle(fontFamily: "Poppins"),
+                                                    style: TextStyle(
+                                                        fontFamily: "Poppins"),
                                                   ),
                                                 ],
                                               ),
@@ -335,10 +349,14 @@ class _ProfileState extends State<Profile> {
                                           const SizedBox(height: 20),
                                           LinearProgressIndicator(
                                             value: completionPercentage,
-                                            backgroundColor: Colors.grey.shade300,
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff052659)),
+                                            backgroundColor:
+                                                Colors.grey.shade300,
+                                            valueColor:
+                                                const AlwaysStoppedAnimation<
+                                                    Color>(Color(0xff052659)),
                                             minHeight: 8,
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
                                           ),
                                           const SizedBox(height: 10),
                                           Text(
